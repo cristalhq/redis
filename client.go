@@ -17,6 +17,14 @@ func NewClient(client *redis.Client) (*Client, error) {
 	return c, nil
 }
 
+// Geo returns a client for Redis Geo structure.
+func (c *Client) Geo() *Geo {
+	geo := &Geo{
+		client: c.client,
+	}
+	return geo
+}
+
 // Set returns a client for Redis Set structure.
 func (c *Client) Set() *Set {
 	set := &Set{
