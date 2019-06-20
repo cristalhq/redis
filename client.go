@@ -17,6 +17,14 @@ func NewClient(client *redis.Client) (*Client, error) {
 	return c, nil
 }
 
+// Set returns a client for Redis Set structure.
+func (c *Client) Set() *Set {
+	set := &Set{
+		client: c.client,
+	}
+	return set
+}
+
 // HLL returns a client for Redis HyperLogLog structure.
 func (c *Client) HLL() *HLL {
 	hll := &HLL{
