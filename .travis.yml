@@ -1,0 +1,17 @@
+language: go
+sudo: false
+env:
+  - GO111MODULE=on
+
+services:
+  - redis-server
+
+go:
+  - 1.x
+  - tip
+
+matrix:
+  allow_failures:
+    - go: tip
+
+go_import_path: github.com/cristalhq/redis
