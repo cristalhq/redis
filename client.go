@@ -16,3 +16,11 @@ func NewClient(client *redis.Client) (*Client, error) {
 	}
 	return c, nil
 }
+
+// HLL returns a client for Redis HyperLogLog structure.
+func (c *Client) HLL() *HLL {
+	hll := &HLL{
+		client: c.client,
+	}
+	return hll
+}
