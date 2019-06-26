@@ -1,7 +1,5 @@
 language: go
 sudo: false
-env:
-  - GO111MODULE=on
 
 services:
   - redis-server
