@@ -1,13 +1,43 @@
-## Redis client for Golang
+# redis
 
-[![Build Status][travis-image]][travis-url]
-[![Go Report Card][go-report-image]][go-report-url]
-[![coverage][coverage-image]][coverage-url]
+[![Build Status][travis-img]][travis-url]
+[![GoDoc][doc-img]][doc-url]
+[![Go Report Card][reportcard-img]][reportcard-url]
+[![Go Report Card][coverage-img]][coverage-url]
 
+Redis client for Go
 
-[travis-image]: https://travis-ci.org/cristalhq/redis.svg?branch=master
+## Features
+
+* Simple API.
+* Dependency-free.
+
+## Install
+
+Go version 1.13
+
+```
+go get github.com/cristalhq/redis
+```
+
+## Example
+
+```go
+```
+
+## Documentation
+
+See [these docs](https://godoc.org/github.com/cristalhq/redis).
+
+## License
+
+[MIT License](LICENSE).
+
+[travis-img]: https://travis-ci.org/cristalhq/redis.svg?branch=master
 [travis-url]: https://travis-ci.org/cristalhq/redis
-[go-report-image]: https://goreportcard.com/badge/github.com/cristalhq/redis
-[go-report-url]: https://goreportcard.com/report/github.com/cristalhq/redis
-[coverage-image]: https://coveralls.io/repos/github/cristalhq/redis/badge.svg?branch=master
+[doc-img]: https://godoc.org/github.com/cristalhq/redis?status.svg
+[doc-url]: https://godoc.org/github.com/cristalhq/redis
+[reportcard-img]: https://goreportcard.com/badge/cristalhq/redis
+[reportcard-url]: https://goreportcard.com/report/cristalhq/redis
+[coverage-img]: https://coveralls.io/repos/github/cristalhq/redis/badge.svg?branch=master
 [coverage-url]: https://coveralls.io/github/cristalhq/redis?branch=master
