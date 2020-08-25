@@ -1,6 +1,8 @@
 package redis
 
-import "github.com/go-redis/redis"
+import (
+	"github.com/go-redis/redis"
+)
 
 // Set represents a Redis Set structure.
 type Set struct {
@@ -8,46 +10,52 @@ type Set struct {
 	client *redis.Client
 }
 
+// NewSet instantiates a new Set structure client for Redis.
 func NewSet(name string, client *redis.Client) *Set {
 	return &Set{name: name, client: client}
 }
 
-// Add add one or more members to a set.
+// Add one or more members to a set.
 func (s *Set) Add(members ...interface{}) (int64, error) {
 	return s.client.SAdd(s.name, members).Result()
 }
 
-// Cardinality get the number of members in a set.
+// Cardinality returns the number of members in a set.
 func (s *Set) Cardinality(key string) (int64, error) {
 	return s.client.SCard(key).Result()
 }
 
-// IsMember determine if a given value is a member of a set.
+// IsMember determines if a given value is a member of a set.
 func (s *Set) IsMember(member interface{}) (bool, error) {
 	return s.client.SIsMember(s.name, member).Result()
 }
 
-// Members get all the members in a set.
+// Members returns all the members in a set.
 func (s *Set) Members(key string) ([]string, error) {
 	return s.client.SMembers(key).Result()
 }
 
-// Move move a member from one set to another.
+// Move a member from one set to another.
 func (s *Set) Move(src, dst string, member interface{}) (bool, error) {
 	return s.client.SMove(src, dst, member).Result()
 }
 
-// Pop remove and return one or multiple random members from a set.
+// Pop removes and returns one or multiple random members from a set.
 func (s *Set) Pop(key string) (string, error) {
 	return s.client.SPop(key).Result()
 }
 
-// RandomMember get one or multiple random members from a set.
+// RandomMember gets one random member from a set.
 func (s *Set) RandomMember(key string) (string, error) {
 	return s.client.SRandMember(key).Result()
 }
 
-// Remove Remove one or more members from a set
+// RandomMembers gets one random member from a set.
+func (s *Set) RandomMembers(key string, count int64) ([]string, error) {
+	return s.client.SRandMemberN(key, count).Result()
+}
+
+// Remove one or more members from a set.
 func (s *Set) Remove(members ...interface{}) (int64, error) {
 	return s.client.SRem(s.name, members).Result()
 }
@@ -62,8 +70,8 @@ func (s *Set) Difference(keys ...string) ([]string, error) {
 	return s.client.SDiff(keys...).Result()
 }
 
-// DIFFSTORE subtract multiple sets and store the resulting set in a key.
-func (s *Set) DIFFSTORE(dst string, keys ...string) (int64, error) {
+// DifferenceStore subtract multiple sets and store the resulting set in a key.
+func (s *Set) DifferenceStore(dst string, keys ...string) (int64, error) {
 	return s.client.SDiffStore(dst, keys...).Result()
 }
 
@@ -72,8 +80,8 @@ func (s *Set) Intersection(keys ...string) ([]string, error) {
 	return s.client.SInter(keys...).Result()
 }
 
-// Interstore intersect multiple sets and store the resulting set in a key.
-func (s *Set) Interstore(dst string, keys ...string) (int64, error) {
+// InterectionStore intersect multiple sets and store the resulting set in a key.
+func (s *Set) InterectionStore(dst string, keys ...string) (int64, error) {
 	return s.client.SInterStore(dst, keys...).Result()
 }
 
