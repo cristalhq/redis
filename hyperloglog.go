@@ -10,6 +10,7 @@ type HyperLogLog struct {
 	client *redis.Client
 }
 
+// NewHyperLogLog ...
 func NewHyperLogLog(name string, client *redis.Client) *HyperLogLog {
 	return &HyperLogLog{name: name, client: client}
 }

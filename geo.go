@@ -28,8 +28,10 @@ type (
 	GeoRadiusQuery = redis.GeoRadiusQuery
 )
 
+// GeoUnit ...
 type GeoUnit string
 
+// GeoUnit consts.
 const (
 	MetersUnit     GeoUnit = "m"
 	KiloMetersUnit GeoUnit = "km"
@@ -37,6 +39,7 @@ const (
 	FeetsUnit      GeoUnit = "ft"
 )
 
+// IsValidGeoUnit ...
 func IsValidGeoUnit(unit GeoUnit) bool {
 	switch unit {
 	case MetersUnit, KiloMetersUnit, MilesUnit, FeetsUnit:
