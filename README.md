@@ -39,11 +39,11 @@ See [these docs][pkg-url].
 
 [MIT License](LICENSE).
 
-[build-img]: https://github.com/cristalhq/atomix/workflows/build/badge.svg
-[build-url]: https://github.com/cristalhq/atomix/actions
-[pkg-img]: https://pkg.go.dev/badge/cristalhq/atomix
-[pkg-url]: https://pkg.go.dev/github.com/cristalhq/atomix
-[reportcard-img]: https://goreportcard.com/badge/cristalhq/atomix
-[reportcard-url]: https://goreportcard.com/report/cristalhq/atomix
-[coverage-img]: https://codecov.io/gh/cristalhq/atomix/branch/master/graph/badge.svg
-[coverage-url]: https://codecov.io/gh/cristalhq/atomix
+[build-img]: https://github.com/cristalhq/redis/workflows/build/badge.svg
+[build-url]: https://github.com/cristalhq/redis/actions
+[pkg-img]: https://pkg.go.dev/badge/cristalhq/redis
+[pkg-url]: https://pkg.go.dev/github.com/cristalhq/redis
+[reportcard-img]: https://goreportcard.com/badge/cristalhq/redis
+[reportcard-url]: https://goreportcard.com/report/cristalhq/redis
+[coverage-img]: https://codecov.io/gh/cristalhq/redis/branch/master/graph/badge.svg
+[coverage-url]: https://codecov.io/gh/cristalhq/redis
