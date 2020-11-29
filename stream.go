@@ -10,10 +10,12 @@ type Stream struct {
 	client *redis.Client
 }
 
-// Stream types.
 type (
-	StreamInfo    = redis.XStream
+	// StreamInfo ...
+	StreamInfo = redis.XStream
+	// StreamMessage ...
 	StreamMessage = redis.XMessage
+	// StreamPending ...
 	StreamPending = redis.XPending
 )
 

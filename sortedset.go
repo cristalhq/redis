@@ -17,11 +17,14 @@ func NewSortedSet(name string, client *redis.Client) *SortedSet {
 	return &SortedSet{name: name, client: client}
 }
 
-// SortedSet types.
 type (
-	SortedSetItem    = redis.Z
-	SortedSetStore   = redis.ZStore
+	// SortedSetItem ...
+	SortedSetItem = redis.Z
+	// SortedSetStore ...
+	SortedSetStore = redis.ZStore
+	// SortedSetRangeBy ...
 	SortedSetRangeBy = redis.ZRangeBy
+	// SortedSetWithKey ...
 	SortedSetWithKey = redis.ZWithKey
 )
 
