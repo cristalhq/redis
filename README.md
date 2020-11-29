@@ -1,9 +1,9 @@
 # redis
 
-[![Build Status][build-img]][build-url]
-[![GoDoc][pkg-img]][pkg-url]
-[![Go Report Card][reportcard-img]][reportcard-url]
-[![Coverage][coverage-img]][coverage-url]
+[![build-img]][build-url]
+[![pkg-img]][pkg-url]
+[![reportcard-img]][reportcard-url]
+[![coverage-img]][coverage-url]
 
 Human-friendly Redis client for Go.
 
@@ -33,17 +33,17 @@ TODO
 
 ## Documentation
 
-See here: [pkg.go.dev][pkg-url].
+See [these docs][pkg-url].
 
 ## License
 
 [MIT License](LICENSE).
 
-[build-img]: https://github.com/cristalhq/redis/workflows/build/badge.svg
-[build-url]: https://github.com/cristalhq/redis/actions
-[pkg-img]: https://pkg.go.dev/badge/cristalhq/redis
-[pkg-url]: https://pkg.go.dev/github.com/cristalhq/redis
-[reportcard-img]: https://goreportcard.com/badge/cristalhq/redis
-[reportcard-url]: https://goreportcard.com/report/cristalhq/redis
-[coverage-img]: https://codecov.io/gh/cristalhq/redis/branch/master/graph/badge.svg
-[coverage-url]: https://codecov.io/gh/cristalhq/redis
+[build-img]: https://github.com/cristalhq/atomix/workflows/build/badge.svg
+[build-url]: https://github.com/cristalhq/atomix/actions
+[pkg-img]: https://pkg.go.dev/badge/cristalhq/atomix
+[pkg-url]: https://pkg.go.dev/github.com/cristalhq/atomix
+[reportcard-img]: https://goreportcard.com/badge/cristalhq/atomix
+[reportcard-url]: https://goreportcard.com/report/cristalhq/atomix
+[coverage-img]: https://codecov.io/gh/cristalhq/atomix/branch/master/graph/badge.svg
+[coverage-url]: https://codecov.io/gh/cristalhq/atomix
