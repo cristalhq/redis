@@ -1,13 +1,15 @@
 package redis
 
 import (
-	"github.com/go-redis/redis"
+	"context"
+
+	"github.com/go-redis/redis/v8"
 )
 
 // Stream ...
 type Stream struct {
 	name   string
-	client *redis.Client
+	client *redisClient
 }
 
 type (
@@ -20,82 +22,84 @@ type (
 )
 
 // NewStream instantiates a new Stream structure client for Redis.
-func NewStream(name string, client *redis.Client) *Stream {
+func NewStream(name string, client *redisClient) *Stream {
 	return &Stream{name: name, client: client}
 }
 
 // Ack ...
-func (s *Stream) Ack(group string, ids ...string) (int64, error) {
-	return s.client.XAck(s.name, group, ids...).Result()
+func (s *Stream) Ack(ctx context.Context, group string, ids ...string) (int64, error) {
+	return s.client.XAck(ctx, s.name, group, ids...).Result()
 }
 
 // Add ...
-func (s *Stream) Add(values map[string]interface{}) (string, error) {
-	return s.client.XAdd(&redis.XAddArgs{
+func (s *Stream) Add(ctx context.Context, values map[string]interface{}) (string, error) {
+	return s.client.XAdd(ctx, &redis.XAddArgs{
 		Stream: s.name,
 		Values: values,
 	}).Result()
 }
 
+// AutoClaim ...
+// TODO: https://redis.io/commands/xautoclaim
+func (s *Stream) AutoClaim(ctx context.Context) ([]StreamMessage, error) {
+	return nil, nil
+}
+
 // Claim ...
-func (s *Stream) Claim() ([]StreamMessage, error) {
-	return s.client.XClaim(&redis.XClaimArgs{
+func (s *Stream) Claim(ctx context.Context) ([]StreamMessage, error) {
+	return s.client.XClaim(ctx, &redis.XClaimArgs{
 		Stream: s.name,
 	}).Result()
 }
 
 // Delete ...
-func (s *Stream) Delete(ids ...string) (int64, error) {
-	return s.client.XDel(s.name, ids...).Result()
+func (s *Stream) Delete(ctx context.Context, ids ...string) (int64, error) {
+	return s.client.XDel(ctx, s.name, ids...).Result()
 }
 
 // Group ...
 // TODO
-func (s *Stream) Group() (int64, error) {
+func (s *Stream) Group(ctx context.Context) (int64, error) {
 	return 0, nil
 }
 
 // Info ...
 // TODO
-func (s *Stream) Info() (int64, error) {
+func (s *Stream) Info(ctx context.Context) (int64, error) {
 	return 0, nil
 }
 
 // Len ...
-func (s *Stream) Len() (int64, error) {
-	return s.client.XLen(s.name).Result()
+func (s *Stream) Len(ctx context.Context) (int64, error) {
+	return s.client.XLen(ctx, s.name).Result()
 }
 
 // Pending ...
-func (s *Stream) Pending(group string) (*StreamPending, error) {
-	return s.client.XPending(s.name, group).Result()
+func (s *Stream) Pending(ctx context.Context, group string) (*StreamPending, error) {
+	return s.client.XPending(ctx, s.name, group).Result()
 }
 
 // Range ...
-func (s *Stream) Range(start, stop string) ([]StreamMessage, error) {
-	return s.client.XRange(s.name, start, stop).Result()
+func (s *Stream) Range(ctx context.Context, start, stop string) ([]StreamMessage, error) {
+	return s.client.XRange(ctx, s.name, start, stop).Result()
 }
 
 // Read ...
-func (s *Stream) Read() ([]StreamInfo, error) {
-	return s.client.XRead(&redis.XReadArgs{
-		Streams: []string{s.name},
-	}).Result()
+func (s *Stream) Read(ctx context.Context) ([]StreamInfo, error) {
+	return s.client.XRead(ctx, &redis.XReadArgs{Streams: []string{s.name}}).Result()
 }
 
 // ReadGroup ...
-func (s *Stream) ReadGroup() ([]StreamInfo, error) {
-	return s.client.XReadGroup(&redis.XReadGroupArgs{
-		Streams: []string{s.name},
-	}).Result()
+func (s *Stream) ReadGroup(ctx context.Context) ([]StreamInfo, error) {
+	return s.client.XReadGroup(ctx, &redis.XReadGroupArgs{Streams: []string{s.name}}).Result()
 }
 
 // ReverseRange ...
-func (s *Stream) ReverseRange(start, stop string) ([]StreamMessage, error) {
-	return s.client.XRevRange(s.name, start, stop).Result()
+func (s *Stream) ReverseRange(ctx context.Context, start, stop string) ([]StreamMessage, error) {
+	return s.client.XRevRange(ctx, s.name, start, stop).Result()
 }
 
 // Trim ...
-func (s *Stream) Trim(maxLen int64) (int64, error) {
-	return s.client.XTrim(s.name, maxLen).Result()
+func (s *Stream) Trim(ctx context.Context, maxLen int64) (int64, error) {
+	return s.client.XTrim(ctx, s.name, maxLen).Result()
 }
