@@ -1,15 +1,16 @@
 package redis
 
 import (
+	"context"
 	"errors"
 
-	"github.com/go-redis/redis"
+	"github.com/go-redis/redis/v8"
 )
 
 // BitMap ...
 type BitMap struct {
 	name   string
-	client *redis.Client
+	client *redisClient
 }
 
 // BitMapOp ...
@@ -24,42 +25,42 @@ const (
 )
 
 // NewBitMap ...
-func NewBitMap(name string, client *redis.Client) *BitMap {
+func NewBitMap(name string, client *redisClient) *BitMap {
 	return &BitMap{name: name, client: client}
 }
 
 // GetBit ...
-func (bm *BitMap) GetBit(offset int64) (int64, error) {
-	return bm.client.GetBit(bm.name, offset).Result()
+func (bm *BitMap) GetBit(ctx context.Context, offset int64) (int64, error) {
+	return bm.client.GetBit(ctx, bm.name, offset).Result()
 }
 
 // SetBit ...
-func (bm *BitMap) SetBit(offset int64, value int) (int64, error) {
-	return bm.client.SetBit(bm.name, offset, value).Result()
+func (bm *BitMap) SetBit(ctx context.Context, offset int64, value int) (int64, error) {
+	return bm.client.SetBit(ctx, bm.name, offset, value).Result()
 }
 
 // BitCount ...
-func (bm *BitMap) BitCount(start, stop int64) (int64, error) {
-	return bm.client.BitCount(bm.name, &redis.BitCount{Start: start, End: stop}).Result()
+func (bm *BitMap) BitCount(ctx context.Context, start, stop int64) (int64, error) {
+	return bm.client.BitCount(ctx, bm.name, &redis.BitCount{Start: start, End: stop}).Result()
 }
 
 // BitOp ...
-func (bm *BitMap) BitOp(op BitMapOp, keys ...string) (int64, error) {
+func (bm *BitMap) BitOp(ctx context.Context, op BitMapOp, keys ...string) (int64, error) {
 	switch op {
 	case AndOp:
-		return bm.client.BitOpAnd(bm.name, keys...).Result()
+		return bm.client.BitOpAnd(ctx, bm.name, keys...).Result()
 	case OrOp:
-		return bm.client.BitOpOr(bm.name, keys...).Result()
+		return bm.client.BitOpOr(ctx, bm.name, keys...).Result()
 	case XorOp:
-		return bm.client.BitOpXor(bm.name, keys...).Result()
+		return bm.client.BitOpXor(ctx, bm.name, keys...).Result()
 	case NotOp:
-		return bm.client.BitOpNot(bm.name, keys[0]).Result()
+		return bm.client.BitOpNot(ctx, bm.name, keys[0]).Result()
 	default:
 		return 0, errors.New("unknown BitMap operation")
 	}
 }
 
 // BitPos ...
-func (bm *BitMap) BitPos(bit int64, pos ...int64) (int64, error) {
-	return bm.client.BitPos(bm.name, bit, pos...).Result()
+func (bm *BitMap) BitPos(ctx context.Context, bit int64, pos ...int64) (int64, error) {
+	return bm.client.BitPos(ctx, bm.name, bit, pos...).Result()
 }

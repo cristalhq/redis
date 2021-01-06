@@ -1,32 +1,25 @@
 package redis
 
-import (
-	"testing"
-	"time"
+// var redisdb redisClient
 
-	"github.com/go-redis/redis"
-)
+// func init() {
+// 	redisTestClient = redis.NewClient(&redis.Options{
+// 		Addr:         ":6379",
+// 		DialTimeout:  10 * time.Second,
+// 		ReadTimeout:  30 * time.Second,
+// 		WriteTimeout: 30 * time.Second,
+// 		PoolSize:     10,
+// 		PoolTimeout:  30 * time.Second,
+// 	})
+// }
 
-var redisdb *redis.Client
+// func TestClient(t *testing.T) {
+// 	client, err := NewClient(redisTestClient)
+// 	if err != nil {
+// 		t.Fatal(err)
+// 	}
 
-func init() {
-	redisdb = redis.NewClient(&redis.Options{
-		Addr:         ":6379",
-		DialTimeout:  10 * time.Second,
-		ReadTimeout:  30 * time.Second,
-		WriteTimeout: 30 * time.Second,
-		PoolSize:     10,
-		PoolTimeout:  30 * time.Second,
-	})
-}
-
-func TestClient(t *testing.T) {
-	client, err := NewClient(redisdb)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	if client == nil {
-		t.Fatal("client is nil")
-	}
-}
+// 	if client == nil {
+// 		t.Fatal("client is nil")
+// 	}
+// }

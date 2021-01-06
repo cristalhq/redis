@@ -20,25 +20,16 @@ func NewClient(client *redisClient) (*Client, error) {
 }
 
 // Geo returns a client for Redis Geo structure.
-func (c *Client) Geo() *Geo {
-	geo := &Geo{
-		client: c.client,
-	}
-	return geo
+func (c *Client) Geo(name string) *Geo {
+	return NewGeo(name, c.client)
 }
 
 // Set returns a client for Redis Set structure.
-func (c *Client) Set() *Set {
-	set := &Set{
-		client: c.client,
-	}
-	return set
+func (c *Client) Set(name string) *Set {
+	return NewSet(name, c.client)
 }
 
-// HLL returns a client for Redis HyperLogLog structure.
-func (c *Client) HLL() *HLL {
-	hll := &HLL{
-		client: c.client,
-	}
-	return hll
+// HyperLogLog returns a client for Redis HyperLogLog structure.
+func (c *Client) HyperLogLog(name string) *HyperLogLog {
+	return NewHyperLogLog(name, c.client)
 }
