@@ -1,16 +1,18 @@
 package redis
 
 import (
-	"github.com/go-redis/redis"
+	"github.com/go-redis/redis/v8"
 )
+
+type redisClient = redis.Client
 
 // Client represents a Redis client.
 type Client struct {
-	client *redis.Client
+	client *redisClient
 }
 
 // NewClient wrapps a redis.Client from github.com/go-redis/redis.
-func NewClient(client *redis.Client) (*Client, error) {
+func NewClient(client *redisClient) (*Client, error) {
 	c := &Client{
 		client: client,
 	}
