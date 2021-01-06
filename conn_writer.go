@@ -32,7 +32,7 @@ func (w *connWriter) Flush() error {
 }
 
 func (w *connWriter) WriteArgs(args []interface{}) error {
-	err := w.wr.WriteByte(arrayReply)
+	err := w.wr.WriteByte('*')
 	if err != nil {
 		return err
 	}
@@ -119,7 +119,7 @@ func (w *connWriter) writeArg(v interface{}) error {
 }
 
 func (w *connWriter) writeBytes(b []byte) error {
-	err := w.wr.WriteByte(stringReply)
+	err := w.wr.WriteByte('$')
 	if err != nil {
 		return err
 	}
