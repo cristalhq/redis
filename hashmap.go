@@ -7,6 +7,7 @@ import (
 // HashMap ...
 type HashMap struct {
 	name   string
+	conn   *client2
 	client *redisClient
 }
 
@@ -72,7 +73,16 @@ func (hm *HashMap) Scan(ctx context.Context, cursor uint64, match string, count 
 
 // Set ...
 func (hm *HashMap) Set(ctx context.Context, field string, value interface{}) (int64, error) {
-	return hm.client.HSet(ctx, hm.name, field, value).Result()
+	req := newRequest("*4\r\n$4\r\nHSET\r\n$")
+	req.appendString(hm.name)
+	req.buf = append(req.buf, '\r', '\n', '$')
+	req.appendString(field)
+	req.buf = append(req.buf, '\r', '\n', '$')
+	req.appendBytes(value.([]byte))
+	req.buf = append(req.buf, '\r', '\n')
+
+	created, err := hm.conn.commandInteger(req)
+	return created, err
 }
 
 // SetNotExist ...
