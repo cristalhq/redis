@@ -1,35 +1,151 @@
 package redis
 
 import (
-	"github.com/go-redis/redis/v8"
+	"bufio"
+	"context"
+	"net"
 )
 
-type redisClient = redis.Client
-
-// Client represents a Redis client.
 type Client struct {
-	client *redisClient
+	pool *connPool
 }
 
-// NewClient wrapps a redis.Client from github.com/go-redis/redis.
-func NewClient(client *redisClient) (*Client, error) {
+func NewClient(_ context.Context, addr string) (*Client, error) {
 	c := &Client{
-		client: client,
+		pool: newConnPool("tcp", addr),
 	}
 	return c, nil
 }
 
-// Geo returns a client for Redis Geo structure.
-func (c *Client) Geo(name string) *Geo {
-	return NewGeo(name, c.client)
+func (c *Client) send(ctx context.Context, req *request) (*conn, *bufio.Reader, error) {
+	conn, err := c.pool.Get(ctx)
+	if err != nil {
+		return nil, nil, err
+	}
+	if _, err := conn.Write(req.buf); err != nil {
+		return nil, nil, err
+	}
+	return conn, getResponse(conn, 1024), nil
 }
 
-// Set returns a client for Redis Set structure.
-func (c *Client) Set(name string) *Set {
-	return NewSet(name, c.client)
+func (c *Client) release(conn *conn, req *request, resp *bufio.Reader) {
+	conn.Close()
+	requestPool.Put(req)
+	responsePool.Put(resp)
 }
 
-// HyperLogLog returns a client for Redis HyperLogLog structure.
-func (c *Client) HyperLogLog(name string) *HyperLogLog {
-	return NewHyperLogLog(name, c.client)
+func (c *Client) cmdInt(ctx context.Context, req *request) (int64, error) {
+	conn, resp, err := c.send(ctx, req)
+	if err != nil {
+		return 0, err
+	}
+	defer c.release(conn, req, resp)
+	return responseDecodeInt(resp)
+}
+
+func (c *Client) cmdInts(ctx context.Context, req *request) ([]int64, error) {
+	conn, resp, err := c.send(ctx, req)
+	if err != nil {
+		return nil, err
+	}
+	defer c.release(conn, req, resp)
+	return responseDecodeInts(resp)
+}
+
+func (c *Client) cmdFloat(ctx context.Context, req *request) (float64, error) {
+	conn, resp, err := c.send(ctx, req)
+	if err != nil {
+		return 0, err
+	}
+	defer c.release(conn, req, resp)
+	return responseDecodeFloat(resp)
+}
+
+func (c *Client) cmdString(ctx context.Context, req *request) (string, error) {
+	conn, resp, err := c.send(ctx, req)
+	if err != nil {
+		return "", err
+	}
+	defer c.release(conn, req, resp)
+	s, err := responseDecodeString(resp)
+	if err != nil {
+		if err == errOK || err == errNull {
+			return "", nil
+		}
+		return "", err
+	}
+	return s, err
+}
+
+func (c *Client) cmdStrings(ctx context.Context, req *request) ([]string, error) {
+	conn, resp, err := c.send(ctx, req)
+	if err != nil {
+		return nil, err
+	}
+	defer c.release(conn, req, resp)
+	return responseDecodeStrings(resp)
+}
+
+const defaultMaxIdleConns = 10
+
+// connPool is a connection pool.
+type connPool struct {
+	network string
+	address string
+	q       chan struct{}
+	c       chan *conn
+}
+
+// newConnPool creates a new connection pool.
+func newConnPool(network, address string) *connPool {
+	p := &connPool{
+		network: network,
+		address: address,
+		q:       make(chan struct{}, defaultMaxIdleConns),
+		c:       make(chan *conn, defaultMaxIdleConns),
+	}
+
+	var d net.Dialer
+	for i := 0; i < defaultMaxIdleConns; i++ {
+		c, err := d.DialContext(context.Background(), p.network, p.address)
+		if err != nil {
+			panic(err)
+		}
+		p.c <- &conn{Conn: c, p: p.c, q: p.q}
+	}
+	return p
+}
+
+func (p *connPool) Get(ctx context.Context) (*conn, error) {
+	select {
+	case <-ctx.Done():
+		return nil, ctx.Err()
+	case conn := <-p.c:
+		return conn, nil
+	default:
+		// p.q <- struct{}{}
+		var d net.Dialer
+		c, err := d.DialContext(ctx, p.network, p.address)
+		if err != nil {
+			return nil, err
+		}
+		return &conn{Conn: c, p: p.c, q: p.q}, nil
+	}
+}
+
+// dial tries to stablish a new connection before a context is canceled
+// while respecting the limit for open connections.
+func (p *connPool) dial(ctx context.Context) (net.Conn, error) {
+	var d net.Dialer
+	c, err := d.DialContext(ctx, p.network, p.address)
+	if err != nil {
+		return nil, err
+	}
+	return &conn{Conn: c, p: p.c, q: p.q}, nil
+}
+
+type conn struct {
+	net.Conn
+	p chan *conn
+	q chan struct{}
 }

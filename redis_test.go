@@ -1,37 +1,53 @@
 package redis
 
 import (
-	"fmt"
+	"context"
 	"log"
 	"math/rand"
-	"os"
+	"reflect"
+	"testing"
 	"time"
-
-	"github.com/go-redis/redis/v8"
 )
 
-var (
-	redisTestClient *redisClient
-	testClient      *Client
-)
+var testClient *Client
 
 func init() {
-	addr, ok := os.LookupEnv("TEST_REDIS_ADDR")
-	if !ok {
-		addr = ":6379"
-	}
-	var err error
-	redisTestClient = redis.NewClient(&redis.Options{
-		Addr: addr,
-	})
+	addr := "127.0.0.1:6379"
 
-	testClient, err = NewClient(redisTestClient)
+	c, err := NewClient(context.Background(), addr)
 	if err != nil {
 		log.Fatal(err)
 	}
+	testClient = c
+
 	rand.Seed(time.Now().UnixNano())
 }
 
-func randomKey(prefix string) string {
-	return fmt.Sprintf("%s-%d", prefix, rand.Uint64())
+func newContext() context.Context {
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+	_ = cancel // ok to skip
+	return ctx
+}
+
+func removeKey(t testing.TB, key string) {
+	t.Helper()
+
+	req := newRequest("*2\r\n$3\r\nDEL\r\n$")
+	req.addString(key)
+	_, err := testClient.cmdInt(context.Background(), req)
+	failIfErr(t, err)
+}
+
+func failIfErr(t testing.TB, err error) {
+	t.Helper()
+	if err != nil {
+		t.Fatal(err)
+	}
+}
+
+func mustEqual(t testing.TB, got, want interface{}) {
+	t.Helper()
+	if !reflect.DeepEqual(got, want) {
+		t.Fatalf("got %v, want %v", got, want)
+	}
 }

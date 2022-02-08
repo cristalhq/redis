@@ -1,5 +1,5 @@
 module github.com/cristalhq/redis
 
-go 1.12
+go 1.17
 
-require github.com/go-redis/redis/v8 v8.4.4
+require github.com/gobwas/pool v0.2.1

@@ -1,38 +1,32 @@
 name: build
 
+permissions: read-all
+
 on:
   push:
-    branches: [ main ]
+    branches: [main]
   pull_request:
-    branches: [ main ]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Tag to create'
+        required: true
+        default: 'v0.0.0'
 
+# See https://github.com/cristalhq/.github/.github/workflows
 jobs:
-
   build:
-    name: Build & Test
-    runs-on: ubuntu-latest
-    steps:
+    uses: cristalhq/.github/.github/workflows/build.yml@454df049fccd7d81729b0c567b75662a2b77e97a # v0.1.3
 
-    - name: Set up Go 1.x
-      uses: actions/setup-go@v2
-      with:
-        go-version: ^1.15
+  codeql:
+    permissions:
+      security-events: write
+    uses: cristalhq/.github/.github/workflows/codeql.yml@454df049fccd7d81729b0c567b75662a2b77e97a # v0.1.3
 
-    - name: Check out code
-      uses: actions/checkout@v2
-
-    - name: Download module dependencies
-      env: 
-         GOPROXY: "https://proxy.golang.org"
-      run: go mod download
-
-    - name: Test
-      run: go test -v -race -coverprofile=coverage.txt ./...
-
-    - name: Upload Coverage
-      uses: codecov/codecov-action@v1
-      continue-on-error: true
-      with:
-        token: ${{secrets.CODECOV_TOKEN}}
-        file: ./coverage.txt
-        fail_ci_if_error: false
+  release:
+    if: github.event_name == 'workflow_dispatch'
+    uses: cristalhq/.github/.github/workflows/release.yml@454df049fccd7d81729b0c567b75662a2b77e97a # v0.1.3
+    permissions: 
+      contents: write
+    with:
+      tag: ${{ github.event.input.tag }}
