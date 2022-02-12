@@ -47,6 +47,8 @@ jobs:
 
       - name: Go Test
         run: go test -v ${{ inputs.race }} -shuffle=on -coverprofile=coverage.txt ./...
+        env:
+          TEST_REDIS_ADDR: redis:6379
 
       - name: Upload Coverage
         uses: codecov/codecov-action@f32b3a3741e1053eb607407145bc9619351dc93b # v2.1.0

@@ -4,6 +4,7 @@ import (
 	"context"
 	"log"
 	"math/rand"
+	"os"
 	"reflect"
 	"testing"
 	"time"
@@ -12,9 +13,12 @@ import (
 var testClient *Client
 
 func init() {
-	addr := "127.0.0.1:6379"
+	redisAddr := os.Getenv("TEST_REDIS_ADDR")
+	if redisAddr == "" {
+		redisAddr = "127.0.0.1:6379"
+	}
 
-	c, err := NewClient(context.Background(), addr)
+	c, err := NewClient(context.Background(), redisAddr)
 	if err != nil {
 		log.Fatal(err)
 	}
