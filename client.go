@@ -25,7 +25,7 @@ func (c *Client) send(ctx context.Context, req *request) (*conn, *bufio.Reader, 
 	if _, err := conn.Write(req.buf); err != nil {
 		return nil, nil, err
 	}
-	return conn, getResponse(conn, 1024), nil
+	return conn, responsePool.Get(conn, 1256), nil
 }
 
 func (c *Client) release(conn *conn, req *request, resp *bufio.Reader) {
@@ -92,7 +92,6 @@ const defaultMaxIdleConns = 10
 type connPool struct {
 	network string
 	address string
-	q       chan struct{}
 	c       chan *conn
 }
 
@@ -101,7 +100,6 @@ func newConnPool(network, address string) *connPool {
 	p := &connPool{
 		network: network,
 		address: address,
-		q:       make(chan struct{}, defaultMaxIdleConns),
 		c:       make(chan *conn, defaultMaxIdleConns),
 	}
 
@@ -111,7 +109,7 @@ func newConnPool(network, address string) *connPool {
 		if err != nil {
 			panic(err)
 		}
-		p.c <- &conn{Conn: c, p: p.c, q: p.q}
+		p.c <- &conn{Conn: c, p: p.c}
 	}
 	return p
 }
@@ -123,13 +121,12 @@ func (p *connPool) Get(ctx context.Context) (*conn, error) {
 	case conn := <-p.c:
 		return conn, nil
 	default:
-		// p.q <- struct{}{}
 		var d net.Dialer
 		c, err := d.DialContext(ctx, p.network, p.address)
 		if err != nil {
 			return nil, err
 		}
-		return &conn{Conn: c, p: p.c, q: p.q}, nil
+		return &conn{Conn: c, p: p.c}, nil
 	}
 }
 
@@ -141,7 +138,7 @@ func (p *connPool) dial(ctx context.Context) (net.Conn, error) {
 	if err != nil {
 		return nil, err
 	}
-	return &conn{Conn: c, p: p.c, q: p.q}, nil
+	return &conn{Conn: c, p: p.c}, nil
 }
 
 type conn struct {

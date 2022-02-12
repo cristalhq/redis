@@ -216,7 +216,9 @@ var responsePool = NewReaderPool(1256, 65536)
 // its capacity for further pass to Put().
 // Note that size could be ceiled to the next power of two.
 // getResponse is a wrapper around responsePool.Get().
-func getResponse(w io.Reader, size int) *bufio.Reader { return responsePool.Get(w, size) }
+func getResponse(w io.Reader, size int) *bufio.Reader {
+	return responsePool.Get(w, size)
+}
 
 // ReaderPool contains logic of *bufio.Reader reuse with various size.
 type ReaderPool struct {
