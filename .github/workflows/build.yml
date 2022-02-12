@@ -27,7 +27,9 @@ jobs:
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
-    uses: cristalhq/.github/.github/workflows/build.yml@454df049fccd7d81729b0c567b75662a2b77e97a # latest from main
+    steps:
+    - name: build
+      uses: cristalhq/.github/.github/workflows/build.yml@454df049fccd7d81729b0c567b75662a2b77e97a # latest from main
 
   codeql:
     permissions:
