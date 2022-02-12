@@ -12,6 +12,46 @@ func NewCommander(client *Client) Commander {
 	return Commander{c: client}
 }
 
+// BitCount does BITCOUNT command, see: https://redis.io/commands/bitcount
+func (c Commander) BitCount(ctx context.Context, key string, start, end int64) (int64, error) {
+	return NewBitMap(key, c.c).BitCount(ctx, start, end)
+}
+
+// BitCountAll does BITCOUNT command, see: https://redis.io/commands/bitcount
+func (c Commander) BitCountAll(ctx context.Context, key string) (int64, error) {
+	return NewBitMap(key, c.c).BitCountAll(ctx)
+}
+
+// BitField does BITFIELD command, see: https://redis.io/commands/bitfield
+func (c Commander) BitField(ctx context.Context, key string) error {
+	return NewBitMap(key, c.c).BitField(ctx)
+}
+
+// BitField does BITFIELD_RO command, see: https://redis.io/commands/bitfield_ro
+func (c Commander) BitFieldReadOnly(ctx context.Context, key string) error {
+	return NewBitMap(key, c.c).BitFieldReadOnly(ctx)
+}
+
+// BitOp does BITOP command, see: https://redis.io/commands/bitop
+func (c Commander) BitOp(ctx context.Context, op BitMapOp, destKey string, keys ...string) (int64, error) {
+	return NewBitMap(destKey, c.c).BitOp(ctx, op, destKey, keys...)
+}
+
+// BitPos does BITPOS command, see: https://redis.io/commands/bitpos
+func (c Commander) BitPos(ctx context.Context, key string, bit int64, pos ...int64) (int64, error) {
+	return NewBitMap(key, c.c).BitPos(ctx, bit, pos...)
+}
+
+// GetBit does GETBIT command, see: https://redis.io/commands/getbit
+func (c Commander) GetBit(ctx context.Context, key string, offset int64) (int64, error) {
+	return NewBitMap(key, c.c).GetBit(ctx, offset)
+}
+
+// SetBit does SETBIT command, see: https://redis.io/commands/setbit
+func (c Commander) SetBit(ctx context.Context, key string, offset int64, value int) (int64, error) {
+	return NewBitMap(key, c.c).SetBit(ctx, offset, value)
+}
+
 // BLMove does BLMOVE, see https://redis.io/commands/blmove
 func (c *Commander) BLMove(ctx context.Context) error {
 	return NewList("", c.c).BlockingLeftMove(ctx)
