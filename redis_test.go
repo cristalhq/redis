@@ -23,6 +23,32 @@ func init() {
 	rand.Seed(time.Now().UnixNano())
 }
 
+func TestNames(t *testing.T) {
+	mustEqual(t, NewList("list", nil).Name(), "list")
+}
+
+func TestNotImplemented(t *testing.T) {
+	f := func(fn func()) {
+		t.Helper()
+		defer func() {
+			if r := recover(); r == nil {
+				t.Fatal("should fail")
+			}
+		}()
+		fn()
+	}
+
+	ctx := newContext()
+	list := NewList("list_not_implemented", nil)
+	f(func() { list.BlockingLeftMove(ctx) })
+	f(func() { list.BlockingLeftMultiPop(ctx) })
+	f(func() { list.BlockingLeftPop(ctx) })
+	f(func() { list.BlockingRightPop(ctx) })
+	f(func() { list.BlockingRightPopLeftPush(ctx) })
+	f(func() { list.LeftMultiPop(ctx) })
+	f(func() { list.LeftPos(ctx) })
+}
+
 func newContext() context.Context {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 	_ = cancel // ok to skip

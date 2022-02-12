@@ -77,6 +77,26 @@ func (r *request) addString3(a, b, c string) {
 	r.buf = append(r.buf, "\r\n"...)
 }
 
+func (r *request) addString4(a, b, c, d string) {
+	r.str(a)
+	r.buf = append(r.buf, "\r\n$"...)
+	r.str(b)
+	r.buf = append(r.buf, "\r\n$"...)
+	r.str(c)
+	r.buf = append(r.buf, "\r\n$"...)
+	r.str(d)
+	r.buf = append(r.buf, "\r\n"...)
+}
+
+func (r *request) addStringIntString(a string, b int64, c string) {
+	r.str(a)
+	r.buf = append(r.buf, "\r\n$"...)
+	r.int(b)
+	r.buf = append(r.buf, "\r\n$"...)
+	r.str(c)
+	r.buf = append(r.buf, "\r\n"...)
+}
+
 func (r *request) addString2AndInt(a, b string, c int64) {
 	r.str(a)
 	r.buf = append(r.buf, "\r\n$"...)
