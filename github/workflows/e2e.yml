@@ -1,0 +1,57 @@
+name: e2e
+
+permissions: read-all
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: true
+    services:
+      redis:
+        image: redis:7.0-rc1-alpine3.15
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@ec3a7ce113134d7a93b817d10a8272cb61118579 # latest
+
+      - name: Install Go
+        uses: actions/setup-go@bfdd3570ce990073878bf10f6b2d79082de49492 # latest
+        with:
+          go-version: ${{ inputs.go }}
+
+      - name: Go Format
+        run: gofmt -s -w . && git diff --exit-code
+
+      - name: Go Tidy
+        run: go mod tidy && git diff --exit-code
+
+      - name: Go Mod
+        run: go mod download
+
+      - name: Go Generate
+        run: go generate ./... && git diff --exit-code
+
+      - name: Go Build
+        run: go build -v ./...
+
+      - name: Go Test
+        run: go test -v ${{ inputs.race }} -shuffle=on -coverprofile=coverage.txt ./...
+
+      - name: Upload Coverage
+        uses: codecov/codecov-action@f32b3a3741e1053eb607407145bc9619351dc93b # v2.1.0
+        continue-on-error: true
+        with:
+          token: ${{secrets.CODECOV_TOKEN}}
+          file: ./coverage.txt
+          fail_ci_if_error: false
