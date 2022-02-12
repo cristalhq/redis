@@ -21,20 +21,4 @@ jobs:
           --health-timeout 5s
           --health-retries 5
 
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@ec3a7ce113134d7a93b817d10a8272cb61118579 # v2.4.0
-
-      - name: Install Go
-        uses: actions/setup-go@424fc82d43fa5a37540bae62709ddcc23d9520d4 # v2.1.5
-        with:
-          go-version: ${{ inputs.go }}
-
-      - name: Go Mod
-        run: go mod download
-
-      - name: Go Build
-        run: go build -v ./...
-
-      - name: Go Test
-        run: go test -v -race -shuffle=on ./...
+    uses: cristalhq/.github/.github/workflows/build.yml@454df049fccd7d81729b0c567b75662a2b77e97a # latest from main
