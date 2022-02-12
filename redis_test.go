@@ -28,10 +28,13 @@ func init() {
 }
 
 func TestNames(t *testing.T) {
+	mustEqual(t, NewBitMap("bitmap", nil).Name(), "bitmap")
 	mustEqual(t, NewList("list", nil).Name(), "list")
 }
 
 func TestNotImplemented(t *testing.T) {
+	ctx := newContext()
+
 	f := func(fn func()) {
 		t.Helper()
 		defer func() {
@@ -42,7 +45,10 @@ func TestNotImplemented(t *testing.T) {
 		fn()
 	}
 
-	ctx := newContext()
+	bm := NewBitMap("bitmap_not_implemented", nil)
+	f(func() { bm.BitField(ctx) })
+	f(func() { bm.BitFieldReadOnly(ctx) })
+
 	list := NewList("list_not_implemented", nil)
 	f(func() { list.BlockingLeftMove(ctx) })
 	f(func() { list.BlockingLeftMultiPop(ctx) })

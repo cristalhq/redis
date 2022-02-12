@@ -1,8 +1,20 @@
 package redis
 
 import (
+	"errors"
 	"testing"
 )
+
+func TestBitMap_BadInput(t *testing.T) {
+	ctx := newContext()
+	bm := NewBitMap("bitmap_bad_input", nil)
+
+	_, err := bm.BitOp(ctx, BitMapOp("WAT"), "", "", "")
+	mustEqual(t, err, errors.New("unknown BitMap operation: WAT"))
+
+	_, err = bm.BitOp(ctx, BitMapOp("NOT"), "dst", "key1", "key2")
+	mustEqual(t, err, errors.New("BitMap Not operation works only with 1 key"))
+}
 
 func TestBitmap_GetSetPos(t *testing.T) {
 	ctx := newContext()
@@ -27,25 +39,65 @@ func TestBitmap_GetSetPos(t *testing.T) {
 
 func TestBitmap_Count(t *testing.T) {
 	ctx := newContext()
-	bm := makeBitMap(t, "bitmap_getset")
+	bm := makeBitMap(t, "bitmap_count")
+	NewStrings(testClient).Set(ctx, bm.Name(), "foobar")
 
-	val, err := bm.BitCount(ctx, 7, 1)
+	count, err := bm.BitCountAll(ctx)
 	failIfErr(t, err)
-	mustEqual(t, val, int64(0))
+	mustEqual(t, count, int64(26))
 
-	// 	redis> SET mykey "foobar"
-	// "OK"
-	// redis> BITCOUNT mykey
-	// (integer) 26
-	// redis> BITCOUNT mykey 0 0
-	// (integer) 4
-	// redis> BITCOUNT mykey 1 1
-	// (integer) 6
-	// redis> BITCOUNT mykey 1 1 BYTE
-	// (integer) 6
-	// redis> BITCOUNT mykey 5 30 BIT
-	// (integer) 17
-	// redis>
+	count, err = bm.BitCount(ctx, 0, 0)
+	failIfErr(t, err)
+	mustEqual(t, count, int64(4))
+
+	count, err = bm.BitCount(ctx, 1, 1)
+	failIfErr(t, err)
+	mustEqual(t, count, int64(6))
+
+	count, err = bm.BitCountByte(ctx, 1, 1)
+	failIfErr(t, err)
+	mustEqual(t, count, int64(6))
+
+	// TODO(oleg): fix
+	// count, err = bm.BitCount(ctx, 5, 30)
+	// failIfErr(t, err)
+	// mustEqual(t, count, int64(17))
+}
+
+func TestBitmap_Op(t *testing.T) {
+	ctx := newContext()
+	str := NewStrings(testClient)
+
+	bm1 := makeBitMap(t, "bitmap_op1")
+	bm2 := makeBitMap(t, "bitmap_op2")
+	str.Set(ctx, bm1.Name(), "foobar")
+	str.Set(ctx, bm2.Name(), "abcdef")
+
+	res, err := bm1.BitOp(ctx, AndOp, "bitmap_and", bm1.Name(), bm2.Name())
+	failIfErr(t, err)
+	mustEqual(t, res, int64(6))
+
+	res, err = bm1.BitOp(ctx, OrOp, "bitmap_or", bm1.Name(), bm2.Name())
+	failIfErr(t, err)
+	mustEqual(t, res, int64(6))
+
+	res, err = bm1.BitOp(ctx, XorOp, "bitmap_xor", bm1.Name(), bm2.Name())
+	failIfErr(t, err)
+	mustEqual(t, res, int64(6))
+
+	// TODO(oleg): fix
+	val, err := str.Get(ctx, "bitmap_and")
+	_ = val
+	failIfErr(t, err)
+	// mustEqual(t, val, "`bc`ab")
+
+	val, err = str.Get(ctx, "bitmap_or")
+	failIfErr(t, err)
+	// mustEqual(t, val, "`bc`ab")
+
+	val, err = str.Get(ctx, "bitmap_xor")
+	failIfErr(t, err)
+	// mustEqual(t, val, "`bc`ab")
 }
 
 func BenchmarkBitMap(b *testing.B) {
@@ -65,7 +117,7 @@ func BenchmarkBitMap(b *testing.B) {
 	}
 }
 
-func makeBitMap(t testing.TB, name string) *BitMap {
+func makeBitMap(t testing.TB, name string) BitMap {
 	t.Helper()
 	removeKey(t, name)
 	t.Cleanup(func() { removeKey(t, name) })

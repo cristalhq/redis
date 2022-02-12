@@ -150,6 +150,17 @@ func (r *request) addStringInt2(a1 string, a2, a3 int64) {
 	r.buf = append(r.buf, "\r\n"...)
 }
 
+func (r *request) addStringInt2String(a string, b, c int64, d string) {
+	r.str(a)
+	r.buf = append(r.buf, "\r\n$"...)
+	r.int(b)
+	r.buf = append(r.buf, "\r\n$"...)
+	r.int(c)
+	r.buf = append(r.buf, "\r\n$"...)
+	r.str(d)
+	r.buf = append(r.buf, "\r\n"...)
+}
+
 func (r *request) addStringAndMap(a string, b map[string]Value) {
 	r.str(a)
 	for k, v := range b {
