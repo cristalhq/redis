@@ -103,6 +103,13 @@ func TestSet_MovePopRemove(t *testing.T) {
 	rem, err := set.Remove(ctx, "one", "10")
 	failIfErr(t, err)
 	mustEqual(t, rem, int64(1))
+
+	added, err = set.Add(ctx, "one", "two", "three", "four")
+	failIfErr(t, err)
+
+	ps, err := set.Pops(ctx, 2)
+	failIfErr(t, err)
+	mustEqual(t, len(ps), int(2))
 }
 
 func TestSet_Diff(t *testing.T) {
@@ -203,15 +210,18 @@ func BenchmarkSet_Add(b *testing.B) {
 		_, err := set.Add(ctx, "1", "2", "3")
 		failIfErr(b, err)
 
-		// count, err := set.Cardinality(ctx)
-		// failIfErr(b, err)
-		// if count != 3 {
-		// 	b.Fatalf("got %d", count)
-		// }
+		count, err := set.Cardinality(ctx)
+		failIfErr(b, err)
+		if count != 3 {
+			b.Fatalf("got %d", count)
+		}
+
+		_, err = set.IsMember(ctx, "1")
+		failIfErr(b, err)
 	}
 }
 
-func makeSet(t testing.TB, name string) *Set {
+func makeSet(t testing.TB, name string) Set {
 	t.Helper()
 	removeKey(t, name)
 	t.Cleanup(func() { removeKey(t, name) })
