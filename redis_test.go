@@ -30,6 +30,7 @@ func init() {
 func TestNames(t *testing.T) {
 	mustEqual(t, NewBitMap("bitmap", nil).Name(), "bitmap")
 	mustEqual(t, NewList("list", nil).Name(), "list")
+	mustEqual(t, NewSet("set", nil).Name(), "set")
 }
 
 func TestNotImplemented(t *testing.T) {
@@ -57,6 +58,9 @@ func TestNotImplemented(t *testing.T) {
 	f(func() { list.BlockingRightPopLeftPush(ctx) })
 	f(func() { list.LeftMultiPop(ctx) })
 	f(func() { list.LeftPos(ctx) })
+
+	set := NewSet("set_not_implemented", nil)
+	f(func() { set.Scan(ctx) })
 
 	str := NewStrings(nil)
 	f(func() { str.LCS(ctx, "key1", "key2") })

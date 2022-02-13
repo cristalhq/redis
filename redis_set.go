@@ -141,11 +141,7 @@ func (set Set) Pops(ctx context.Context, count int) ([]string, error) {
 func (set Set) RandomMember(ctx context.Context) (string, error) {
 	req := newRequest("*2\r\n$11\r\nSRANDMEMBER\r\n$")
 	req.addString(set.name)
-	s, err := set.c.cmdString(ctx, req)
-	if err != nil && err.Error() != "OK" {
-		return "", err
-	}
-	return s, nil
+	return set.c.cmdString(ctx, req)
 }
 
 // RandomMembers gets one random member from a set.
@@ -166,7 +162,7 @@ func (set Set) Remove(ctx context.Context, members ...string) (int64, error) {
 
 // Scan incrementally iterate Set elements.
 // See: https://redis.io/commands/sscan
-func (set Set) Scan(ctx context.Context, cursor uint64, match string, count int64) (_ []string, _ uint64, _ error) {
+func (set Set) Scan(ctx context.Context) error {
 	panic("redis: Set.Scan not implemented")
 }
 
