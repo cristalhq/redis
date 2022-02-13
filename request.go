@@ -97,6 +97,17 @@ func (r *request) addStringIntString(a string, b int64, c string) {
 	r.buf = append(r.buf, "\r\n"...)
 }
 
+func (r *request) addStringIntStrings(a string, b int64, c []string) {
+	r.str(a)
+	r.buf = append(r.buf, "\r\n$"...)
+	r.int(b)
+	for _, s := range c {
+		r.buf = append(r.buf, "\r\n$"...)
+		r.str(s)
+	}
+	r.buf = append(r.buf, "\r\n"...)
+}
+
 func (r *request) addString2AndInt(a, b string, c int64) {
 	r.str(a)
 	r.buf = append(r.buf, "\r\n$"...)
