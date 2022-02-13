@@ -90,7 +90,7 @@ func BenchmarkHyperLogLog(b *testing.B) {
 	}
 }
 
-func makeHLL(t testing.TB, name string) *HyperLogLog {
+func makeHLL(t testing.TB, name string) HyperLogLog {
 	t.Helper()
 	removeKey(t, name)
 	t.Cleanup(func() { removeKey(t, name) })
