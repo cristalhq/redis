@@ -71,8 +71,7 @@ func (sc Scripting) CallReadOnly(ctx context.Context, script string, keys []stri
 func (sc Scripting) FunctionDelete(ctx context.Context, libName string) error {
 	req := newRequest("*3\r\n$8\r\nFUNCTION\r\n$6\r\nDELETE\r\n$")
 	req.addString(libName)
-	_, err := sc.c.cmdString(ctx, req)
-	return err
+	return sc.c.cmdSimple(ctx, req)
 }
 
 // FunctionDump returns the serialized payload of loaded libraries.
@@ -80,8 +79,7 @@ func (sc Scripting) FunctionDelete(ctx context.Context, libName string) error {
 // See: https://redis.io/commands/function-dump
 func (sc Scripting) FunctionDump(ctx context.Context) error {
 	req := newRequest("*2\r\n$8\r\nFUNCTION\r\n$4\r\nDUMP\r\n$")
-	_, err := sc.c.cmdString(ctx, req)
-	return err
+	return sc.c.cmdSimple(ctx, req)
 }
 
 // FunctionFlush deletes all the libraries.
@@ -92,16 +90,14 @@ func (sc Scripting) FunctionFlush(ctx context.Context, mode string) error {
 	}
 	req := newRequest("*3\r\n$8\r\nFUNCTION\r\n$5\r\nFLUSH\r\n$")
 	req.addString(mode)
-	_, err := sc.c.cmdString(ctx, req)
-	return err
+	return sc.c.cmdSimple(ctx, req)
 }
 
 // FunctionKill kills a function that is currently executing.
 // See: https://redis.io/commands/function-kill
 func (sc Scripting) FunctionKill(ctx context.Context) error {
 	req := newRequest("*2\r\n$8\r\nFUNCTION\r\n$4\r\nKILL\r\n$")
-	_, err := sc.c.cmdString(ctx, req)
-	return err
+	return sc.c.cmdSimple(ctx, req)
 }
 
 // FunctionList returns information about the functions and libraries.
@@ -140,8 +136,7 @@ func (sc Scripting) ScriptDebug(ctx context.Context, mode string) error {
 	}
 	req := newRequest("*3\r\n$6\r\nSCRIPT\r\n$5\r\nDEBUG\r\n$")
 	req.addString(mode)
-	_, err := sc.c.cmdString(ctx, req)
-	return err
+	return sc.c.cmdSimple(ctx, req)
 }
 
 // ScriptExists returns information about the existence of the scripts in the script cache.
@@ -168,16 +163,14 @@ func (sc Scripting) ScriptFlush(ctx context.Context, mode string) error {
 	}
 	req := newRequest("*3\r\n$6\r\nSCRIPT\r\n$5\r\nFLUSH\r\n$")
 	req.addString(mode)
-	_, err := sc.c.cmdString(ctx, req)
-	return err
+	return sc.c.cmdSimple(ctx, req)
 }
 
 // ScriptKill kills the currently executing EVAL script, assuming no write operation was yet performed by the script.
 // See: https://redis.io/commands/script-kill
 func (sc Scripting) ScriptKill(ctx context.Context) error {
 	req := newRequest("*2\r\n$6\r\nSCRIPT\r\n$4\r\nKILL\r\n$")
-	_, err := sc.c.cmdString(ctx, req)
-	return err
+	return sc.c.cmdSimple(ctx, req)
 }
 
 // ScriptLoad loads a script into the scripts cache, without executing it.

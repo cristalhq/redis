@@ -141,8 +141,7 @@ func (str Strings) MultiSet(ctx context.Context, pairs ...string) error {
 	}
 	req := newRequestSize(1+len(pairs), "\r\n$4\r\nMSET")
 	req.addStrings(pairs)
-	_, err := str.c.cmdString(ctx, req)
-	return err
+	return str.c.cmdSimple(ctx, req)
 }
 
 // MultiSetNotExist sets the given keys to their respective values.
@@ -164,8 +163,7 @@ func (str Strings) MultiSetNotExist(ctx context.Context, pairs ...string) (int64
 func (str Strings) Set(ctx context.Context, key, value string) error {
 	req := newRequest("*3\r\n$3\r\nSET\r\n$")
 	req.addString2(key, value)
-	_, err := str.c.cmdString(ctx, req)
-	return err
+	return str.c.cmdSimple(ctx, req)
 }
 
 // SetExpire key to hold the string value and set key to timeout after a given number of seconds.
@@ -173,8 +171,7 @@ func (str Strings) Set(ctx context.Context, key, value string) error {
 func (str Strings) SetExpire(ctx context.Context, d time.Duration, key, value string) error {
 	req := newRequest("*4\r\n$6\r\nPSETEX\r\n$")
 	req.addStringIntString(key, int64(d.Milliseconds()), value)
-	_, err := str.c.cmdString(ctx, req)
-	return err
+	return str.c.cmdSimple(ctx, req)
 }
 
 // SetNotExist key to hold string value if key does not exist.
@@ -183,8 +180,7 @@ func (str Strings) SetExpire(ctx context.Context, d time.Duration, key, value st
 func (str Strings) SetNotExist(ctx context.Context, key, value string) error {
 	req := newRequest("*3\r\n$5\r\nSETNX\r\n$")
 	req.addString2(key, value)
-	_, err := str.c.cmdString(ctx, req)
-	return err
+	return str.c.cmdSimple(ctx, req)
 }
 
 // SetRange overwrites part of the string stored at key, starting at the specified offset, for the entire length of value.

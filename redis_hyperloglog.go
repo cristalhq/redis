@@ -46,8 +46,7 @@ func (h HyperLogLog) CountWith(ctx context.Context, keys ...string) (int64, erro
 func (h HyperLogLog) Merge(ctx context.Context, keys ...string) error {
 	req := newRequestSize(1+len(keys), "\r\n$7\r\nPFMERGE\r\n$")
 	req.addStringAndStrings(h.name, keys)
-	_, err := h.c.cmdString(ctx, req)
-	return err
+	return h.c.cmdSimple(ctx, req)
 }
 
 // MergeInto N HyperLogLogs, but with high constant times.
@@ -55,6 +54,5 @@ func (h HyperLogLog) Merge(ctx context.Context, keys ...string) error {
 func (h HyperLogLog) MergeInto(ctx context.Context, destination string, keys ...string) error {
 	req := newRequestSize(2+len(keys), "\r\n$7\r\nPFMERGE\r\n$")
 	req.addStringAndStrings(destination, keys)
-	_, err := h.c.cmdString(ctx, req)
-	return err
+	return h.c.cmdSimple(ctx, req)
 }

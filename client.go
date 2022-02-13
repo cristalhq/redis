@@ -34,6 +34,25 @@ func (c *Client) release(conn *conn, req *request, resp *bufio.Reader) {
 	responsePool.Put(resp)
 }
 
+func (c *Client) cmdSimple(ctx context.Context, req *request) error {
+	conn, resp, err := c.send(ctx, req)
+	if err != nil {
+		return err
+	}
+	defer c.release(conn, req, resp)
+	s, err := responseDecodeString(resp)
+	if err != nil {
+		if err == errOK || err == errNull {
+			return nil
+		}
+		return err
+	}
+	if s == "OK" {
+		return nil
+	}
+	return err
+}
+
 func (c *Client) cmdInt(ctx context.Context, req *request) (int64, error) {
 	conn, resp, err := c.send(ctx, req)
 	if err != nil {

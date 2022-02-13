@@ -153,8 +153,7 @@ func (list List) Remove(ctx context.Context, count int64, element string) (int64
 func (list List) Set(ctx context.Context, index int64, element string) error {
 	req := newRequest("*4\r\n$4\r\nLSET\r\n$")
 	req.addStringIntString(list.name, index, element)
-	_, err := list.c.cmdString(ctx, req)
-	return err
+	return list.c.cmdSimple(ctx, req)
 }
 
 // Trim an existing list so that it will contain only the specified range of elements specified.
@@ -162,8 +161,7 @@ func (list List) Set(ctx context.Context, index int64, element string) error {
 func (list List) Trim(ctx context.Context, start, stop int64) error {
 	req := newRequest("*4\r\n$5\r\nLTRIM\r\n$")
 	req.addStringInt2(list.name, start, stop)
-	_, err := list.c.cmdString(ctx, req)
-	return err
+	return list.c.cmdSimple(ctx, req)
 }
 
 // RightPop removes and returns the last elements of the list.
