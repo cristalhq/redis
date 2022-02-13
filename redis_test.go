@@ -57,6 +57,9 @@ func TestNotImplemented(t *testing.T) {
 	f(func() { list.BlockingRightPopLeftPush(ctx) })
 	f(func() { list.LeftMultiPop(ctx) })
 	f(func() { list.LeftPos(ctx) })
+
+	str := NewStrings(nil)
+	f(func() { str.LCS(ctx, "key1", "key2") })
 }
 
 func newContext() context.Context {

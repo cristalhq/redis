@@ -5,6 +5,9 @@ import (
 	"testing"
 )
 
+func TestStrings_BadInput(t *testing.T) {
+}
+
 func TestStrings_GetSet(t *testing.T) {
 	ctx := newContext()
 	removeKey(t, "key")
@@ -20,64 +23,82 @@ func TestStrings_GetSet(t *testing.T) {
 	val, err = str.Get(ctx, "key")
 	failIfErr(t, err)
 	mustEqual(t, val, "value")
+
+	val, err = str.GetDel(ctx, "key")
+	failIfErr(t, err)
+	mustEqual(t, val, "value")
+
+	size, err := str.Append(ctx, "key", "app")
+	failIfErr(t, err)
+	mustEqual(t, size, int64(3))
+
+	// GetDel
+	// 	redis> SET mykey "Hello"
+	// "OK"
+	// redis> GETDEL mykey
+	// ERR Unknown or disabled command 'GETDEL'
+	// redis> GET mykey
+	// "Hello"
+	// redis>
+
 }
 
-func TestStrings_Count(t *testing.T) {
+func TestStrings_Multi(t *testing.T) {
 	ctx := newContext()
-	bm := makeBitMap(t, "bitmap_getset")
+	removeKey(t, "key1")
+	removeKey(t, "key2")
+	str := makeStrings(t)
 
-	val, err := bm.BitCount(ctx, 7, 1)
+	err := str.MultiSet(ctx, "key1", "Hello", "key2", "World")
 	failIfErr(t, err)
-	mustEqual(t, val, int64(0))
 
-	// 	redis> SET mykey "foobar"
-	// "OK"
-	// redis> BITCOUNT mykey
-	// (integer) 26
-	// redis> BITCOUNT mykey 0 0
-	// (integer) 4
-	// redis> BITCOUNT mykey 1 1
-	// (integer) 6
-	// redis> BITCOUNT mykey 1 1 BYTE
-	// (integer) 6
-	// redis> BITCOUNT mykey 5 30 BIT
-	// (integer) 17
-	// redis>
+	val1, err := str.Get(ctx, "key1")
+	failIfErr(t, err)
+	mustEqual(t, val1, "Hello")
+
+	val2, err := str.Get(ctx, "key2")
+	failIfErr(t, err)
+	mustEqual(t, val2, "World")
+}
+
+func TestStrings_MultiNotExist(t *testing.T) {
+	ctx := newContext()
+	removeKey(t, "key1")
+	removeKey(t, "key2")
+	removeKey(t, "key3")
+	str := makeStrings(t)
+
+	got, err := str.MultiSetNotExist(ctx, "key1", "Hello", "key2", "there")
+	failIfErr(t, err)
+	mustEqual(t, got, int64(1))
+
+	got, err = str.MultiSetNotExist(ctx, "key2", "new", "key3", "world")
+	failIfErr(t, err)
+	mustEqual(t, got, int64(0))
+
+	res, err := str.MultiGet(ctx, "key1", "key2", "key3")
+	failIfErr(t, err)
+	mustEqual(t, res, []string{"Hello", "there", ""})
 }
 
 func BenchmarkStrings(b *testing.B) {
 	ctx := context.Background()
 	str := makeStrings(b)
-	key, val := "bench_str_key", "OK" //bench_str_val"
-	err := str.Set(ctx, key, val)
-	failIfErr(b, err)
+	key, val := "bench_str_key", "bench_str_val"
 
 	b.ReportAllocs()
 	b.ResetTimer()
 
 	for i := 0; i < b.N; i++ {
-		// go func() {
-		// got, err := str.Get(ctx, key)
-		// failIfErr(b, err)
-		// mustEqual(b, got, val)
-		// }()
-		// go func() {
-		// 	got, err := str.Get(ctx, key)
-		// 	failIfErr(b, err)
-		// 	mustEqual(b, got, val)
-		// }()
-
 		err := str.Set(ctx, key, val)
 		failIfErr(b, err)
 
-		// _, err = str.Get(ctx, key)
-		// failIfErr(b, err)
+		_, err = str.Get(ctx, key)
+		failIfErr(b, err)
 	}
 }
 
 func makeStrings(t testing.TB) Strings {
 	t.Helper()
-	// removeKey(t, name)
-	// t.Cleanup(func() { removeKey(t, name) })
 	return NewStrings(testClient)
 }
