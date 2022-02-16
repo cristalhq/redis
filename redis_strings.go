@@ -33,7 +33,7 @@ func (str Strings) Dec(ctx context.Context, key string) (int64, error) {
 // DecBy decrements the number stored at key by delta.
 // See: https://redis.io/commands/decrby
 func (str Strings) DecBy(ctx context.Context, key string, delta int64) (int64, error) {
-	req := newRequest("*3\r\n$4\r\nDECRBY\r\n$")
+	req := newRequest("*3\r\n$6\r\nDECRBY\r\n$")
 	req.addStringInt(key, delta)
 	return str.c.cmdInt(ctx, req)
 }
@@ -56,32 +56,32 @@ func (str Strings) GetDel(ctx context.Context, key string) (string, error) {
 
 // GetExpire TODO
 // See: https://redis.io/commands/getex
-func (str Strings) GetExpire(ctx context.Context, d time.Duration, key string) (string, error) {
-	req := newRequest("*4\r\n$5\r\nGETEX\r\n$2\r\nPX\r\n$")
-	req.addStringInt(key, int64(d.Milliseconds()))
+func (str Strings) GetExpire(ctx context.Context, key string, d time.Duration) (string, error) {
+	req := newRequest("*4\r\n$5\r\nGETEX\r\n$")
+	req.addString2AndInt(key, "PX", int64(d.Milliseconds()))
 	return str.c.cmdString(ctx, req)
 }
 
 // GetExpireAt TODO
 // See: https://redis.io/commands/getex
-func (str Strings) GetExpireAt(ctx context.Context, key string) (string, error) {
-	req := newRequest("*3\r\n$5\r\nGETEX\r\n$7\r\nPERSIST\r\n$")
-	req.addString(key)
+func (str Strings) GetExpireAt(ctx context.Context, key string, at time.Time) (string, error) {
+	req := newRequest("*4\r\n$5\r\nGETEX\r\n$")
+	req.addString2AndInt(key, "PXAT", int64(at.UnixMilli()))
 	return str.c.cmdString(ctx, req)
 }
 
 // GetPersist remove the time to live associated with the key.
 // See: https://redis.io/commands/getex
-func (str Strings) GetPersist(ctx context.Context, t time.Time, key string) (string, error) {
-	req := newRequest("*4\r\n$5\r\nGETEX\r\n$4\r\nPXAT\r\n$")
-	req.addStringInt(key, int64(t.UnixMilli()))
+func (str Strings) GetPersist(ctx context.Context, key string) (string, error) {
+	req := newRequest("*3\r\n$5\r\nGETEX\r\n$")
+	req.addString2(key, "PERSIST")
 	return str.c.cmdString(ctx, req)
 }
 
 // GetRange returns the substring of the string value stored at key, determined by the offsets start and end (both are inclusive).
 // See: https://redis.io/commands/getrange
 func (str Strings) GetRange(ctx context.Context, key string, start, end int64) (string, error) {
-	req := newRequest("*4\r\n$7\r\nGETRANGE\r\n$")
+	req := newRequest("*4\r\n$8\r\nGETRANGE\r\n$")
 	req.addStringInt2(key, start, end)
 	return str.c.cmdString(ctx, req)
 }
@@ -105,7 +105,7 @@ func (str Strings) Inc(ctx context.Context, key string) (int64, error) {
 // IncBy increments the number stored at key by delta.
 // See: https://redis.io/commands/incrby
 func (str Strings) IncBy(ctx context.Context, key string, delta int64) (int64, error) {
-	req := newRequest("*3\r\n$4\r\nINCRBY\r\n$")
+	req := newRequest("*3\r\n$6\r\nINCRBY\r\n$")
 	req.addStringInt(key, delta)
 	return str.c.cmdInt(ctx, req)
 }
@@ -113,7 +113,7 @@ func (str Strings) IncBy(ctx context.Context, key string, delta int64) (int64, e
 // IncByFloat increments the number stored at key by delta.
 // See: https://redis.io/commands/incrbyfloat
 func (str Strings) IncByFloat(ctx context.Context, key string, delta float64) (float64, error) {
-	req := newRequest("*4\r\n$12\r\nHINCRBYFLOAT\r\n$")
+	req := newRequest("*3\r\n$11\r\nINCRBYFLOAT\r\n$")
 	// TODO(oleg): must encode as float
 	req.addStringInt(key, int64(delta))
 	return str.c.cmdFloat(ctx, req)
@@ -177,10 +177,11 @@ func (str Strings) SetExpire(ctx context.Context, d time.Duration, key, value st
 // SetNotExist key to hold string value if key does not exist.
 // In that case, it is equal to SET. When key already holds a value, no operation is performed.
 // See: https://redis.io/commands/SETNX
-func (str Strings) SetNotExist(ctx context.Context, key, value string) error {
+func (str Strings) SetNotExist(ctx context.Context, key, value string) (bool, error) {
 	req := newRequest("*3\r\n$5\r\nSETNX\r\n$")
 	req.addString2(key, value)
-	return str.c.cmdSimple(ctx, req)
+	res, err := str.c.cmdInt(ctx, req)
+	return res == 1, err
 }
 
 // SetRange overwrites part of the string stored at key, starting at the specified offset, for the entire length of value.
