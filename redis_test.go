@@ -30,6 +30,7 @@ func init() {
 func TestNames(t *testing.T) {
 	mustEqual(t, NewBitMap("bitmap", nil).Name(), "bitmap")
 	mustEqual(t, NewList("list", nil).Name(), "list")
+	mustEqual(t, NewHashMap("hashmap", nil).Name(), "hashmap")
 	mustEqual(t, NewSet("set", nil).Name(), "set")
 }
 
