@@ -18,7 +18,7 @@ func TestStrings_BadInput(t *testing.T) {
 	mustEqual(t, err, errors.New("one of the keys does not have a value"))
 }
 
-func TestStrings_GetSet(t *testing.T) {
+func TestStrings(t *testing.T) {
 	ctx := newContext()
 	removeKey(t, "str_getset")
 	str := makeStrings(t)

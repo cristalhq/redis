@@ -6,7 +6,7 @@ import (
 	"testing"
 )
 
-func TestKeys_GetSet(t *testing.T) {
+func TestKeys(t *testing.T) {
 	ctx := newContext()
 	removeKey(t, "keys_key1")
 	removeKey(t, "keys_key2")

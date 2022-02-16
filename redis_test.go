@@ -12,17 +12,19 @@ import (
 
 var testClient *Client
 
+var redisAddr string
+
 func init() {
-	redisAddr := os.Getenv("TEST_REDIS_ADDR")
+	redisAddr = os.Getenv("TEST_REDIS_ADDR")
 	if redisAddr == "" {
 		redisAddr = "127.0.0.1:6379"
 	}
 
-	c, err := NewClient(context.Background(), redisAddr)
+	var err error
+	testClient, err = getTestClient()
 	if err != nil {
 		log.Fatal(err)
 	}
-	testClient = c
 
 	rand.Seed(time.Now().UnixNano())
 }
@@ -71,6 +73,10 @@ func newContext() context.Context {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 	_ = cancel // ok to skip
 	return ctx
+}
+
+func getTestClient() (*Client, error) {
+	return NewClient(context.Background(), redisAddr)
 }
 
 func removeKey(t testing.TB, key string) {
