@@ -145,10 +145,10 @@ func (r *request) addStrings(a []string) {
 	r.buf = append(r.buf, "\r\n"...)
 }
 
-func (r *request) addStringInt(a1 string, a2 int64) {
-	r.str(a1)
+func (r *request) addStringInt(a string, b int64) {
+	r.str(a)
 	r.buf = append(r.buf, "\r\n$"...)
-	r.int(a2)
+	r.int(b)
 	r.buf = append(r.buf, "\r\n"...)
 }
 
@@ -180,5 +180,19 @@ func (r *request) addStringAndMap(a string, b map[string]Value) {
 		r.buf = append(r.buf, "\r\n$"...)
 		r.str(v)
 	}
+	r.buf = append(r.buf, "\r\n"...)
+}
+
+func (r *request) addIntString(a int64, b string) {
+	r.int(a)
+	r.buf = append(r.buf, "\r\n$"...)
+	r.str(b)
+	r.buf = append(r.buf, "\r\n"...)
+}
+
+func (r *request) addInt2(a, b int64) {
+	r.int(a)
+	r.buf = append(r.buf, "\r\n$"...)
+	r.int(b)
 	r.buf = append(r.buf, "\r\n"...)
 }

@@ -46,14 +46,11 @@ func responseDecodeInts(r *bufio.Reader) ([]int64, error) {
 }
 
 func responseDecodeFloat(r *bufio.Reader) (float64, error) {
-	line, err := responseReadLine(r)
+	line, err := responseDecodeString(r)
 	if err != nil {
 		return 0, err
 	}
-	if len(line) > 3 && line[0] == ':' {
-		return strconv.ParseFloat(string(line[1:len(line)-2]), 64)
-	}
-	return 0, responseReadError(r, line, "integer")
+	return strconv.ParseFloat(string(line), 64)
 }
 
 func responseReadError(r *bufio.Reader, line []byte, want string) error {
