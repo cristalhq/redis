@@ -40,7 +40,8 @@ func TestBitmap_GetSetPos(t *testing.T) {
 func TestBitmap_Count(t *testing.T) {
 	ctx := newContext()
 	bm := makeBitMap(t, "bitmap_count")
-	NewStrings(testClient).Set(ctx, bm.Name(), "foobar")
+	err := NewStrings(testClient).Set(ctx, bm.Name(), "foobar")
+	failIfErr(t, err)
 
 	count, err := bm.BitCountAll(ctx)
 	failIfErr(t, err)
@@ -70,8 +71,10 @@ func TestBitmap_Op(t *testing.T) {
 
 	bm1 := makeBitMap(t, "bitmap_op1")
 	bm2 := makeBitMap(t, "bitmap_op2")
-	str.Set(ctx, bm1.Name(), "foobar")
-	str.Set(ctx, bm2.Name(), "abcdef")
+	err := str.Set(ctx, bm1.Name(), "foobar")
+	failIfErr(t, err)
+	err = str.Set(ctx, bm2.Name(), "abcdef")
+	failIfErr(t, err)
 
 	res, err := bm1.BitOp(ctx, AndOp, "bitmap_and", bm1.Name(), bm2.Name())
 	failIfErr(t, err)

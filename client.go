@@ -163,5 +163,4 @@ func (p *connPool) dial(ctx context.Context) (net.Conn, error) {
 type conn struct {
 	net.Conn
 	p chan *conn
-	q chan struct{}
 }

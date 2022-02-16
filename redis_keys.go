@@ -55,7 +55,7 @@ func (k Keys) Exists(ctx context.Context, keys ...string) (int64, error) {
 // See: https://redis.io/commands/expire
 func (k Keys) Expire(ctx context.Context, key string, timeout time.Duration) (bool, error) {
 	req := newRequest("*2\r\n$6\r\nEXISTS\r\n$")
-	req.addStringInt(key, int64(timeout.Milliseconds()))
+	req.addStringInt(key, timeout.Milliseconds())
 	res, err := k.c.cmdInt(ctx, req)
 	return res == 1, err
 }
@@ -64,7 +64,7 @@ func (k Keys) Expire(ctx context.Context, key string, timeout time.Duration) (bo
 // See: https://redis.io/commands/EXPIREAT
 func (k Keys) ExpireAt(ctx context.Context, key string, at time.Time) (bool, error) {
 	req := newRequest("*4\r\n$8\r\nEXPIREAT\r\n$4\r\nPXAT\r\n$")
-	req.addStringInt(key, int64(at.UnixMilli()))
+	req.addStringInt(key, at.UnixMilli())
 	res, err := k.c.cmdInt(ctx, req)
 	return res == 1, err
 }

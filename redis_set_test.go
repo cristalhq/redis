@@ -106,6 +106,7 @@ func TestSet_MovePopRemove(t *testing.T) {
 
 	added, err = set.Add(ctx, "one", "two", "three", "four")
 	failIfErr(t, err)
+	mustEqual(t, added, int64(4))
 
 	ps, err := set.Pops(ctx, 2)
 	failIfErr(t, err)

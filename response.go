@@ -50,7 +50,7 @@ func responseDecodeFloat(r *bufio.Reader) (float64, error) {
 	if err != nil {
 		return 0, err
 	}
-	return strconv.ParseFloat(string(line), 64)
+	return strconv.ParseFloat(line, 64)
 }
 
 func responseReadError(r *bufio.Reader, line []byte, want string) error {

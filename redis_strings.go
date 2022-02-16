@@ -66,7 +66,7 @@ func (str Strings) GetExpire(ctx context.Context, key string, d time.Duration) (
 // See: https://redis.io/commands/getex
 func (str Strings) GetExpireAt(ctx context.Context, key string, at time.Time) (string, error) {
 	req := newRequest("*4\r\n$5\r\nGETEX\r\n$")
-	req.addString2AndInt(key, "PXAT", int64(at.UnixMilli()))
+	req.addString2AndInt(key, "PXAT", at.UnixMilli())
 	return str.c.cmdString(ctx, req)
 }
 
