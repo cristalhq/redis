@@ -48,5 +48,5 @@ See [these docs][pkg-url].
 [reportcard-url]: https://goreportcard.com/report/cristalhq/redis
 [coverage-img]: https://codecov.io/gh/cristalhq/redis/branch/master/graph/badge.svg
 [coverage-url]: https://codecov.io/gh/cristalhq/redis
-[version-img]: https://img.shields.io/github/v/release/cristalhq/jwt
-[version-url]: https://github.com/cristalhq/jwt/releases
+[version-img]: https://img.shields.io/github/v/release/cristalhq/redis
+[version-url]: https://github.com/cristalhq/redis/releases
