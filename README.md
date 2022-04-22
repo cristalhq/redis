@@ -4,6 +4,7 @@
 [![pkg-img]][pkg-url]
 [![reportcard-img]][reportcard-url]
 [![coverage-img]][coverage-url]
+[![version-img]][version-url]
 
 Human-friendly Redis client for Go.
 
@@ -47,3 +48,5 @@ See [these docs][pkg-url].
 [reportcard-url]: https://goreportcard.com/report/cristalhq/redis
 [coverage-img]: https://codecov.io/gh/cristalhq/redis/branch/master/graph/badge.svg
 [coverage-url]: https://codecov.io/gh/cristalhq/redis
+[version-img]: https://img.shields.io/github/v/release/cristalhq/jwt
+[version-url]: https://github.com/cristalhq/jwt/releases
