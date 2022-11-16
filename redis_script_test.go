@@ -4,11 +4,11 @@ import "testing"
 
 func TestScript_Eval(t *testing.T) {
 	ctx := newContext()
-	scr := makeScripting(t)
+	scr := makeScripting()
 
 	script := "return {KEYS[1],ARGV[1]}"
 	args := []string{"hello"}
-	val, err := scr.Eval(ctx, script, []string{"key"}, args...)
+	val, err := scr.Eval(ctx, nil, script, []string{"key"}, args...)
 	failIfErr(t, err)
 	mustEqual(t, val, []string{"key", "hello"})
 
@@ -22,7 +22,7 @@ func TestScript_Eval(t *testing.T) {
 	failIfErr(t, err)
 	mustEqual(t, got, sha)
 
-	val, err = scr.EvalSHA(ctx, sha, []string{"key"}, args...)
+	val, err = scr.EvalSHA(ctx, nil, sha, []string{"key"}, args...)
 	failIfErr(t, err)
 	mustEqual(t, val, []string{"key", "hello"})
 }
@@ -30,7 +30,7 @@ func TestScript_Eval(t *testing.T) {
 func TestScript_Function(t *testing.T) {
 	t.Skip("only for Redis 7.0")
 	ctx := newContext()
-	scr := makeScripting(t)
+	scr := makeScripting()
 
 	err := scr.FunctionLoad(ctx, "mylib", "redis.register_function('myfunc', function(keys, args) return args[1] end)")
 	failIfErr(t, err)
@@ -65,6 +65,19 @@ func TestScript_Function(t *testing.T) {
 	// failIfErr(t, err)
 }
 
-func makeScripting(t testing.TB) Scripting {
+func TestScript_Script(t *testing.T) {
+	ctx := newContext()
+
+	// this script will/should exist in test Redis
+	script := "return {KEYS[1],ARGV[1]}"
+	s, err := NewScript(testClient, script, 1)
+	failIfErr(t, err)
+
+	res, err := s.Run(ctx, nil, []string{"script_key1"}, []string{"script_arg1"})
+	failIfErr(t, err)
+	mustEqual(t, res, []string{"script_key1", "script_arg1"})
+}
+
+func makeScripting() Scripting {
 	return NewScripting(testClient)
 }

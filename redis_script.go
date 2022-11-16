@@ -2,7 +2,12 @@ package redis
 
 import (
 	"context"
+	"crypto/sha1"
+	"encoding/hex"
+	"errors"
 	"fmt"
+	"io"
+	"strings"
 )
 
 // Scripting client for script operations in Redis.
@@ -20,7 +25,7 @@ func NewScripting(client *Client) Scripting {
 
 // Eval invokes the execution of a server-side Lua script.
 // See: https://redis.io/commands/eval
-func (sc Scripting) Eval(ctx context.Context, script string, keys []string, args ...string) ([]string, error) {
+func (sc Scripting) Eval(ctx context.Context, dst []string, script string, keys []string, args ...string) ([]string, error) {
 	req := newRequestSize(3+len(keys)+len(args), "\r\n$4\r\nEVAL\r\n$")
 	req.addStringIntStrings(script, int64(len(keys)), append(keys, args...))
 	return sc.c.cmdStrings(ctx, req)
@@ -28,7 +33,7 @@ func (sc Scripting) Eval(ctx context.Context, script string, keys []string, args
 
 // EvalSHA evaluates a script from the server's cache by its SHA1 digest.
 // See: https://redis.io/commands/evalsha
-func (sc Scripting) EvalSHA(ctx context.Context, hash string, keys []string, args ...string) ([]string, error) {
+func (sc Scripting) EvalSHA(ctx context.Context, dst []string, hash string, keys []string, args ...string) ([]string, error) {
 	req := newRequestSize(3+len(keys)+len(args), "\r\n$7\r\nEVALSHA\r\n$")
 	req.addStringIntStrings(hash, int64(len(keys)), append(keys, args...))
 	return sc.c.cmdStrings(ctx, req)
@@ -182,4 +187,63 @@ func (sc Scripting) ScriptLoad(ctx context.Context, script string) (string, erro
 	req := newRequest("*3\r\n$6\r\nSCRIPT\r\n$4\r\nLOAD\r\n$")
 	req.addString(script)
 	return sc.c.cmdString(ctx, req)
+}
+
+type Script struct {
+	c    *Client
+	keys int
+	src  string
+	hash string
+}
+
+// NewScript
+func NewScript(client *Client, script string, keys int) (Script, error) {
+	if script == "" {
+		return Script{}, errors.New("script cannot be empty")
+	}
+	scr := Script{
+		c:    client,
+		keys: keys,
+		src:  script,
+		hash: hashScript(script),
+	}
+	return scr, nil
+}
+
+func (s Script) Run(ctx context.Context, dst []string, keys []string, args []string) ([]string, error) {
+	scr := NewScripting(s.c)
+	res, err := scr.EvalSHA(ctx, dst, s.hash, keys, args...)
+	if err == nil {
+		return res, nil
+	}
+	if strings.HasPrefix(err.Error(), "NOSCRIPT ") {
+		return scr.Eval(ctx, dst, s.src, keys, args...)
+	}
+	return nil, err
+}
+
+// Function ...
+type Function struct{}
+
+// NewFunction ..
+func NewFunction(client *Client) (Function, error) {
+	return Function{}, nil
+}
+
+func (f Function) Run(ctx context.Context, dst []string, keys []string, args []string) ([]string, error) {
+	// scr := NewScripting(s.c)
+	// res, err := scr.EvalSHA(ctx, dst, s.hash, keys, args...)
+	// if err == nil {
+	// 	return res, nil
+	// }
+	// if strings.HasPrefix(err.Error(), "NOSCRIPT ") {
+	// 	return scr.Eval(ctx, dst, s.src, keys, args...)
+	// }
+	return nil, nil
+}
+
+func hashScript(script string) string {
+	h := sha1.New()
+	_, _ = io.WriteString(h, script)
+	return hex.EncodeToString(h.Sum(nil))
 }
