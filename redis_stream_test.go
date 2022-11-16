@@ -39,7 +39,31 @@ func TestStream_Add(t *testing.T) {
 	// 	2) "3"
 }
 
-func makeStream(t testing.TB, name string) *Stream {
+func TestStream_Group(t *testing.T) {
+	ctx := context.Background()
+	st := makeStream(t, "stream_group")
+
+	defer removeKey(t, "group1")
+	err := st.GroupCreate(ctx, "group1", "0")
+	failIfErr(t, err)
+
+	cons, err := st.GroupCreateConsumer(ctx, "group1", "consumer1")
+	failIfErr(t, err)
+	mustEqual(t, cons, 1)
+
+	cons, err = st.GroupDeleteConsumer(ctx, "group1", "consumer1")
+	failIfErr(t, err)
+	mustEqual(t, cons, 0)
+
+	err = st.GroupSetID(ctx, "group1", "0")
+	failIfErr(t, err)
+
+	got, err := st.GroupDestroy(ctx, "group1")
+	failIfErr(t, err)
+	mustEqual(t, got, 1)
+}
+
+func makeStream(t testing.TB, name string) Stream {
 	t.Helper()
 	removeKey(t, name)
 	t.Cleanup(func() { removeKey(t, name) })
