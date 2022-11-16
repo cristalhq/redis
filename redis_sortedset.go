@@ -4,20 +4,25 @@ import (
 	"context"
 )
 
-// SortedSet ...
+// SortedSet client for sorted set operations in Redis.
+// See: https://redis.io/commands#sorted-set
 type SortedSet struct {
 	name string
 	c    *Client
 }
 
-// NewSortedSet instantiates a new SortedSet structure client for Redis.
-func NewSortedSet(name string, client *Client) *SortedSet {
-	return &SortedSet{name: name, c: client}
+// NewSortedSet returns new Redis SortedSet client.
+func NewSortedSet(name string, client *Client) SortedSet {
+	return SortedSet{name: name, c: client}
+}
+
+// SortedSetItem TODO
+type SortedSetItem struct {
+	Score  float64
+	Member string
 }
 
 type (
-	// SortedSetItem ...
-	SortedSetItem = interface{} // redis.Z
 	// SortedSetStore ...
 	SortedSetStore = interface{} // redis.ZStore
 	// SortedSetRangeBy ...
@@ -26,171 +31,214 @@ type (
 	SortedSetWithKey = interface{} // redis.ZWithKey
 )
 
-// Add ...
-func (ss *SortedSet) Add(ctx context.Context, items ...*SortedSetItem) (int64, error) {
-	req := newRequestSize(2+len(items), "\r\n$4\r\nZADD\r\n$")
+// BlockingPopMax ...
+// BZMPOP
+// See: https://redis.io/commands/bzmpop
+func (ss SortedSet) BlockingPop(ctx context.Context) (*SortedSetWithKey, error) {
+	panic("redis: SortedSet.BlockingPopMax not implemented")
+}
+
+// BlockingPopMax ...
+// BZPOPMAX
+// See: https://redis.io/commands/bzpopmax
+func (ss SortedSet) BlockingPopMax(ctx context.Context) (*SortedSetWithKey, error) {
+	panic("redis: SortedSet.BlockingPopMax not implemented")
+}
+
+// BlockingPopMin ...
+// BZPOPMIN
+// See: https://redis.io/commands/bzpopmin
+func (ss SortedSet) BlockingPopMin(ctx context.Context) (*SortedSetWithKey, error) {
+	panic("redis: SortedSet.BlockingPopMin not implemented")
+}
+
+// Add all the specified members with the specified scores to the sorted set.
+// See: https://redis.io/commands/zadd
+func (ss SortedSet) Add(ctx context.Context, items ...SortedSetItem) (int64, error) {
+	return 0, nil
+	req := newRequestSize(2+2*len(items), "\r\n$4\r\nZADD\r\n$")
 	req.addString(ss.name)
+	for range items {
+		// req.addStringInt(ss.name)
+	}
 	return ss.c.cmdInt(ctx, req)
 }
 
-// Cardinality ...
-func (ss *SortedSet) Cardinality(ctx context.Context) (int64, error) {
+// Cardinality returns the sorted set cardinality (number of elements).
+// See: https://redis.io/commands/zcard
+func (ss SortedSet) Cardinality(ctx context.Context) (int64, error) {
 	req := newRequest("*2\r\n$5\r\nZCARD\r\n$")
 	req.addString(ss.name)
 	return ss.c.cmdInt(ctx, req)
 }
 
 // Count ...
-func (ss *SortedSet) Count(ctx context.Context, min, max string) (int64, error) {
+// See: https://redis.io/commands/zcount
+func (ss SortedSet) Count(ctx context.Context, min, max string) (int64, error) {
 	req := newRequest("*2\r\n$6\r\nZCOUNT\r\n$")
 	req.addString(ss.name)
 	return ss.c.cmdInt(ctx, req)
 }
 
-// Scan ...
-func (ss *SortedSet) Scan(ctx context.Context, cursor uint64, match string, count int64) ([]string, uint64, error) {
-	panic("redis: SortedSet.Scan not implemented")
+// Diff ...
+// See: https://redis.io/commands/zdiff
+func (ss SortedSet) Diff(ctx context.Context, keys ...string) ([]string, error) {
+	req := newRequest("*2\r\n$6\r\nZDIFF\r\n$")
+	req.addString(ss.name)
+	return ss.c.cmdStrings(ctx, req)
 }
 
-// Score ...
-func (ss *SortedSet) Score(ctx context.Context, member string) (float64, error) {
-	panic("redis: SortedSet.Score not implemented")
+// DiffWithScores ...
+// --See: https://redis.io/commands/zdiff
+func (ss SortedSet) DiffWithScores(ctx context.Context, keys ...string) ([]string, error) {
+	req := newRequest("*2\r\n$6\r\nZDIFF\r\n$")
+	req.addString(ss.name)
+	return ss.c.cmdStrings(ctx, req)
 }
 
-// IncBy ...
-func (ss *SortedSet) IncBy(ctx context.Context, delta float64, member string) (float64, error) {
-	panic("redis: SortedSet.IncBy not implemented")
+// DiffStore ...
+// See: https://redis.io/commands/zdiffstore
+func (ss SortedSet) DiffStore(ctx context.Context, destKey string, min, max string) (int64, error) {
+	req := newRequest("*2\r\n$6\r\nZDIFFSTORE\r\n$")
+	req.addString(ss.name)
+	return ss.c.cmdInt(ctx, req)
 }
 
-// LexCount ...
-func (ss *SortedSet) LexCount(ctx context.Context, min, max string) (int64, error) {
-	panic("redis: SortedSet.LexCount not implemented")
+// ZINCRBY TODO
+// See: https://redis.io/commands/zincrby
+func (ss SortedSet) ZINCRBY(ctx context.Context) error { return nil }
+
+// ZINTER TODO
+// See: https://redis.io/commands/zinter
+func (ss SortedSet) ZINTER(ctx context.Context) error { return nil }
+
+// ZINTERCARD TODO
+// See: https://redis.io/commands/zintercard
+func (ss SortedSet) ZINTERCARD(ctx context.Context) error { return nil }
+
+// ZINTERSTORE TODO
+// See: https://redis.io/commands/zinterstore
+func (ss SortedSet) ZINTERSTORE(ctx context.Context) error { return nil }
+
+// LexCount TODO
+// See: https://redis.io/commands/zlexcount
+func (ss SortedSet) LexCount(ctx context.Context, min, max string) (int64, error) {
+	req := newRequest("*4\r\n$9\r\nZLEXCOUNT\r\n$")
+	req.addString3(ss.name, min, max)
+	return ss.c.cmdInt(ctx, req)
 }
 
-// PopMax ...
-func (ss *SortedSet) PopMax(ctx context.Context, count ...int64) ([]SortedSetItem, error) {
-	panic("redis: SortedSet.PopMax not implemented")
+// ZMPOP TODO
+// See: https://redis.io/commands/zmpop
+func (ss SortedSet) ZMPOP(ctx context.Context) error { return nil }
+
+// ZMSCORE TODO
+// See: https://redis.io/commands/zmscore
+func (ss SortedSet) MultiScore(ctx context.Context, keys ...string) error {
+	return nil
 }
 
-// PopMin ...
-func (ss *SortedSet) PopMin(ctx context.Context, count ...int64) ([]SortedSetItem, error) {
-	panic("redis: SortedSet.PopMin not implemented")
+// PopMax removes and returns up to count members with the highest scores in the sorted set.
+// See: https://redis.io/commands/zpopmax
+func (ss SortedSet) PopMax(ctx context.Context, count int) ([]string, error) {
+	req := newRequest("*3\r\n$7\r\nZPOPMAX\r\n$")
+	req.addStringInt(ss.name, int64(count))
+	return ss.c.cmdStrings(ctx, req)
 }
 
-// Range ...
-func (ss *SortedSet) Range(ctx context.Context, start, stop int64) ([]string, error) {
-	panic("redis: SortedSet.Range not implemented")
+// PopMin removes and returns up to count members with the lowest scores in the sorted set.
+// See: https://redis.io/commands/zpopmin
+func (ss SortedSet) PopMin(ctx context.Context, count int) ([]string, error) {
+	req := newRequest("*3\r\n$7\r\nZPOPMIN\r\n$")
+	req.addStringInt(ss.name, int64(count))
+	return ss.c.cmdStrings(ctx, req)
 }
 
-// RangeByLex ...
-func (ss *SortedSet) RangeByLex(ctx context.Context, opt *SortedSetRangeBy) ([]string, error) {
-	panic("redis: SortedSet.RangeByLex not implemented")
+// ZRANDMEMBER TODO
+// See: https://redis.io/commands/zrandmember
+func (ss SortedSet) ZRANDMEMBER(ctx context.Context) error { return nil }
+
+// ZRANGE TODO
+// See: https://redis.io/commands/zrange
+func (ss SortedSet) ZRANGE(ctx context.Context) error { return nil }
+
+// ZRANGEBYLEX TODO
+// See: https://redis.io/commands/zrangebylex
+func (ss SortedSet) ZRANGEBYLEX(ctx context.Context) error { return nil }
+
+// ZRANGEBYSCORE TODO
+// See: https://redis.io/commands/zrangebyscore
+func (ss SortedSet) ZRANGEBYSCORE(ctx context.Context) error { return nil }
+
+// ZRANGESTORE TODO
+// See: https://redis.io/commands/zrangestore
+func (ss SortedSet) ZRANGESTORE(ctx context.Context) error { return nil }
+
+// ZRANK TODO
+// See: https://redis.io/commands/zrank
+func (ss SortedSet) ZRANK(ctx context.Context) error { return nil }
+
+// Remove removes the specified members from the sorted set stored.
+// Non existing members are ignored.
+// See: https://redis.io/commands/zrem
+func (ss SortedSet) Remove(ctx context.Context, members ...string) (int64, error) {
+	req := newRequestSize(2+len(members), "\r\n$4\r\nZREM\r\n$")
+	req.addStringAndStrings(ss.name, members)
+	return ss.c.cmdInt(ctx, req)
 }
 
-// RangeByScore ...
-func (ss *SortedSet) RangeByScore(ctx context.Context, opt *SortedSetRangeBy) ([]string, error) {
-	panic("redis: SortedSet.RangeByScore not implemented")
+// ZREMRANGEBYLEX TODO
+// See: https://redis.io/commands/zremrangebylex
+func (ss SortedSet) ZREMRANGEBYLEX(ctx context.Context) error { return nil }
+
+// ZREMRANGEBYRANK TODO
+// See: https://redis.io/commands/zremrangebyrank
+func (ss SortedSet) ZREMRANGEBYRANK(ctx context.Context) error { return nil }
+
+// ZREMRANGEBYSCORE TODO
+// See: https://redis.io/commands/zremrangebyscore
+func (ss SortedSet) ZREMRANGEBYSCORE(ctx context.Context) error { return nil }
+
+// ZREVRANGE TODO
+// See: https://redis.io/commands/zrevrange
+func (ss SortedSet) ZREVRANGE(ctx context.Context) error { return nil }
+
+// ZREVRANGEBYLEX TODO
+// See: https://redis.io/commands/zrevrangebylex
+func (ss SortedSet) ZREVRANGEBYLEX(ctx context.Context) error { return nil }
+
+// ZREVRANGEBYSCORE TODO
+// See: https://redis.io/commands/zrevrangebyscore
+func (ss SortedSet) ZREVRANGEBYSCORE(ctx context.Context) error { return nil }
+
+// ZREVRANK TODO
+// See: https://redis.io/commands/zrevrank
+func (ss SortedSet) ZREVRANK(ctx context.Context) error { return nil }
+
+// ZSCAN TODO
+// See: https://redis.io/commands/zscan
+func (ss SortedSet) ZSCAN(ctx context.Context) error { return nil }
+
+// Score returns the score of member in the sorted set.
+// See: https://redis.io/commands/zscore
+func (ss SortedSet) Score(ctx context.Context, member string) (string, error) {
+	req := newRequest("*3\r\n$6\r\nZSCORE\r\n$")
+	req.addString2(ss.name, member)
+	return ss.c.cmdString(ctx, req)
 }
 
-// Rank ...
-func (ss *SortedSet) Rank(ctx context.Context, member string) (int64, error) {
-	panic("redis: SortedSet.Rank not implemented")
+// ZUNION TODO
+// See: https://redis.io/commands/zunion
+func (ss SortedSet) Union(ctx context.Context, keys ...string) ([]string, error) {
+	req := newRequestSize(2+len(keys), "\r\n$6\r\nZUNION\r\n$")
+	req.addStringAndStrings(ss.name, keys)
+	return ss.c.cmdStrings(ctx, req)
 }
 
-// ReverseRange ...
-func (ss *SortedSet) ReverseRange(ctx context.Context, start, stop int64) ([]string, error) {
-	panic("redis: SortedSet.ReverseRange not implemented")
+// ZUNIONSTORE TODO
+// See: https://redis.io/commands/zunionstore
+func (ss SortedSet) ZUNIONSTORE(ctx context.Context, dst string, keys ...string) (int64, error) {
+	req := newRequestSize(3+len(keys), "\r\n$11\r\nSUNIONSTORE\r\n$")
+	req.addString2AndStrings(dst, ss.name, keys)
+	return ss.c.cmdInt(ctx, req)
 }
-
-// ReverseRangeByLex ...
-func (ss *SortedSet) ReverseRangeByLex(ctx context.Context, opt *SortedSetRangeBy) ([]string, error) {
-	panic("redis: SortedSet.ReverseRangeByLex not implemented")
-}
-
-// ReverseRangeByScore ...
-func (ss *SortedSet) ReverseRangeByScore(ctx context.Context, opt *SortedSetRangeBy) ([]string, error) {
-	panic("redis: SortedSet.ReverseRangeByScore not implemented")
-}
-
-// ReverseRank ...
-func (ss *SortedSet) ReverseRank(ctx context.Context, member string) (int64, error) {
-	panic("redis: SortedSet.ReverseRank not implemented")
-}
-
-// Remove ...
-func (ss *SortedSet) Remove(ctx context.Context, members ...interface{}) (int64, error) {
-	panic("redis: SortedSet.Remove not implemented")
-}
-
-// RemoveRangeByLex ...
-func (ss *SortedSet) RemoveRangeByLex(ctx context.Context, min, max string) (int64, error) {
-	panic("redis: SortedSet.RemoveRangeByLex not implemented")
-}
-
-// RemoveRangeByRank ...
-func (ss *SortedSet) RemoveRangeByRank(ctx context.Context, start, stop int64) (int64, error) {
-	panic("redis: SortedSet.RemoveRangeByRank not implemented")
-}
-
-// RemoveRangeByScore ...
-func (ss *SortedSet) RemoveRangeByScore(ctx context.Context, min, max string) (int64, error) {
-	panic("redis: SortedSet.RemoveRangeByScore not implemented")
-}
-
-// IntersectionStore ...
-func (ss *SortedSet) IntersectionStore(ctx context.Context, store *SortedSetStore, _ ...string) (int64, error) {
-	panic("redis: SortedSet.IntersectionStore not implemented")
-}
-
-// UnionStore ...
-func (ss *SortedSet) UnionStore(ctx context.Context, dest string, store *SortedSetStore, _ ...string) (int64, error) {
-	panic("redis: SortedSet.UnionStore not implemented")
-}
-
-// BlockingPopMax ...
-func (ss *SortedSet) BlockingPopMax(ctx context.Context) (*SortedSetWithKey, error) {
-	panic("redis: SortedSet.BlockingPopMax not implemented")
-}
-
-// BlockingPopMin ...
-func (ss *SortedSet) BlockingPopMin(ctx context.Context) (*SortedSetWithKey, error) {
-	panic("redis: SortedSet.BlockingPopMin not implemented")
-}
-
-/*
-BZMPOP
-BZPOPMAX
-BZPOPMIN
-
-ZCARD
-ZCOUNT
-ZDIFF
-ZDIFFSTORE
-ZINCRBY
-ZINTER
-ZINTERCARD
-ZINTERSTORE
-ZLEXCOUNT
-ZMPOP
-ZMSCORE
-ZPOPMAX
-ZPOPMIN
-ZRANDMEMBER
-ZRANGE
-ZRANGEBYLEX
-ZRANGEBYSCORE
-ZRANGESTORE
-ZRANK
-ZREM
-ZREMRANGEBYLEX
-ZREMRANGEBYRANK
-ZREMRANGEBYSCORE
-ZREVRANGE
-ZREVRANGEBYLEX
-ZREVRANGEBYSCORE
-ZREVRANK
-ZSCAN
-ZSCORE
-ZUNION
-ZUNIONSTORE
-*/
