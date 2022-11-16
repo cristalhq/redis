@@ -34,6 +34,7 @@ func TestNames(t *testing.T) {
 	mustEqual(t, NewList("list", nil).Name(), "list")
 	mustEqual(t, NewHashMap("hashmap", nil).Name(), "hashmap")
 	mustEqual(t, NewSet("set", nil).Name(), "set")
+	mustEqual(t, NewStream("stream", nil).Name(), "stream")
 }
 
 func TestNotImplemented(t *testing.T) {

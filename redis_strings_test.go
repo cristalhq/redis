@@ -77,7 +77,7 @@ func TestStrings_Expire(t *testing.T) {
 			t.Fatalf("too low: %v", d)
 		}
 
-		time.Sleep(20 * time.Millisecond)
+		time.Sleep(30 * time.Millisecond)
 
 		val, err := str.Get(ctx, "str_expire")
 		failIfErr(t, err)
