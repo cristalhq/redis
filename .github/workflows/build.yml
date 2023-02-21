@@ -20,11 +20,11 @@ jobs:
   codeql:
     permissions:
       security-events: write
-    uses: cristalhq/.github/.github/workflows/codeql.yml@454df049fccd7d81729b0c567b75662a2b77e97a # latest from main
+    uses: cristalhq/.github/.github/workflows/codeql.yml@02d6a2a176fc4c22e5d84c2636f8a62e53dc17a4 # latest from main
 
   release:
     if: github.event_name == 'workflow_dispatch'
-    uses: cristalhq/.github/.github/workflows/release.yml@454df049fccd7d81729b0c567b75662a2b77e97a # latest from main
+    uses: cristalhq/.github/.github/workflows/release.yml@02d6a2a176fc4c22e5d84c2636f8a62e53dc17a4 # latest from main
     permissions: 
       contents: write
     with:
