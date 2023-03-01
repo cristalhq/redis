@@ -17,8 +17,9 @@ on:
 
 # See https://github.com/cristalhq/.github/.github/workflows
 jobs:
-  build:
-    uses: cristalhq/.github/.github/workflows/build.yml@v0.2.1
+  # TODO: disable for now
+  # build:
+  #   uses: cristalhq/.github/.github/workflows/build.yml@v0.2.1
 
   vuln:
     uses: cristalhq/.github/.github/workflows/vuln.yml@v0.2.1
