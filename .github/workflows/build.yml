@@ -1,11 +1,12 @@
 name: build
 
-permissions: read-all
-
 on:
   push:
     branches: [main]
   pull_request:
+    branches: [main]
+  schedule:
+    - cron: '0 0 * * 0' # run "At 00:00 on Sunday"
   workflow_dispatch:
     inputs:
       tag:
@@ -13,19 +14,17 @@ on:
         required: true
         default: 'v0.0.0'
 
+
 # See https://github.com/cristalhq/.github/.github/workflows
 jobs:
-  # no build step, see e2e.yml
+  build:
+    uses: cristalhq/.github/.github/workflows/build.yml@v0.2.1
 
-  codeql:
-    permissions:
-      security-events: write
-    uses: cristalhq/.github/.github/workflows/codeql.yml@454df049fccd7d81729b0c567b75662a2b77e97a # latest from main
+  vuln:
+    uses: cristalhq/.github/.github/workflows/vuln.yml@v0.2.1
 
   release:
     if: github.event_name == 'workflow_dispatch'
-    uses: cristalhq/.github/.github/workflows/release.yml@454df049fccd7d81729b0c567b75662a2b77e97a # latest from main
-    permissions: 
-      contents: write
+    uses: cristalhq/.github/.github/workflows/release.yml@v0.2.1
     with:
       tag: ${{ github.event.input.tag }}
