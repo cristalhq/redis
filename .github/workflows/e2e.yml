@@ -9,12 +9,17 @@ on:
 
 jobs:
   run:
+    name: Build
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     strategy:
       fail-fast: true
+      matrix:
+        go: ['stable', 'oldstable']
+
     services:
       redis:
-        image: redis:7.0.5-alpine3.16
+        image: redis:7.0.9-alpine3.17
         options: >-
           --health-cmd "redis-cli ping"
           --health-interval 10s
@@ -24,36 +29,22 @@ jobs:
           - 6379:6379
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@2541b1294d2704b0964813337f33b291d3f8596b # latest
-
       - name: Install Go
-        uses: actions/setup-go@84cbf8094393cdc5fe1fe1671ff2647332956b1a # latest
+        uses: actions/setup-go@v3
         with:
-          go-version: 1.17
+          go-version: ${{ matrix.go }}
+          check-latest: true
 
-      - name: Go Format
-        run: gofmt -s -w . && git diff --exit-code
-
-      - name: Go Tidy
-        run: go mod tidy && git diff --exit-code
-
-      - name: Go Mod
-        run: go mod download
-
-      - name: Go Generate
-        run: go generate ./... && git diff --exit-code
-
-      - name: Go Build
-        run: go build -v ./...
+      - name: Check out code
+        uses: actions/checkout@v3
 
       - name: Go Test
-        run: go test -v ${{ inputs.race }} -shuffle=on -coverprofile=coverage.txt ./...
+        run: go test -v -race -shuffle=on -coverprofile=coverage.txt ./...
         env:
           TEST_REDIS_ADDR: ":6379"
 
       - name: Upload Coverage
-        uses: codecov/codecov-action@81cd2dc8148241f03f5839d295e000b8f761e378 # v2.1.0
+        uses: codecov/codecov-action@v3
         continue-on-error: true
         with:
           token: ${{secrets.CODECOV_TOKEN}}

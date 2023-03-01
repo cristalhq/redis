@@ -2,7 +2,6 @@ package redis
 
 import (
 	"context"
-	"log"
 	"math/rand"
 	"os"
 	"reflect"
@@ -23,7 +22,7 @@ func init() {
 	var err error
 	testClient, err = getTestClient()
 	if err != nil {
-		log.Fatal(err)
+		panic(err)
 	}
 
 	rand.Seed(time.Now().UnixNano())
