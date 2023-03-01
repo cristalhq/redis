@@ -18,8 +18,10 @@ on:
 # See https://github.com/cristalhq/.github/.github/workflows
 jobs:
   # TODO: disable for now
-  # build:
-  #   uses: cristalhq/.github/.github/workflows/build.yml@v0.2.1
+  build:
+    uses: cristalhq/.github/.github/workflows/build.yml@cristaloleg-patch-1
+    with:
+      skipTests: true # e2e.yml is responsible for tests
 
   vuln:
     uses: cristalhq/.github/.github/workflows/vuln.yml@v0.2.1
