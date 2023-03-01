@@ -10,9 +10,14 @@ type Client struct {
 	pool *connPool
 }
 
-func NewClient(_ context.Context, addr string) (*Client, error) {
+func NewClient(ctx context.Context, addr string) (*Client, error) {
+	pool, err := newConnPool(ctx, "tcp", addr)
+	if err != nil {
+		return nil, err
+	}
+
 	c := &Client{
-		pool: newConnPool("tcp", addr),
+		pool: pool,
 	}
 	return c, nil
 }
@@ -22,14 +27,18 @@ func (c *Client) send(ctx context.Context, req *request) (*conn, *bufio.Reader, 
 	if err != nil {
 		return nil, nil, err
 	}
+
 	if _, err := conn.Write(req.buf); err != nil {
+		c.pool.Put(conn)
 		return nil, nil, err
 	}
-	return conn, responsePool.Get(conn, 1256), nil
+
+	br := responsePool.Get(conn, 1256)
+	return conn, br, nil
 }
 
 func (c *Client) release(conn *conn, req *request, resp *bufio.Reader) {
-	conn.Close()
+	c.pool.Put(conn)
 	requestPool.Put(req)
 	responsePool.Put(resp)
 }
@@ -111,53 +120,55 @@ const defaultMaxIdleConns = 10
 type connPool struct {
 	network string
 	address string
-	c       chan *conn
+	connCh  chan *conn
 }
 
 // newConnPool creates a new connection pool.
-func newConnPool(network, address string) *connPool {
+func newConnPool(ctx context.Context, network, address string) (*connPool, error) {
 	p := &connPool{
 		network: network,
 		address: address,
-		c:       make(chan *conn, defaultMaxIdleConns),
+		connCh:  make(chan *conn, defaultMaxIdleConns),
 	}
 
 	var d net.Dialer
 	for i := 0; i < defaultMaxIdleConns; i++ {
-		c, err := d.DialContext(context.Background(), p.network, p.address)
+		c, err := d.DialContext(ctx, p.network, p.address)
 		if err != nil {
-			panic(err)
+			return nil, err
 		}
-		p.c <- &conn{Conn: c, p: p.c}
+		p.connCh <- &conn{Conn: c, p: p.connCh}
 	}
-	return p
+	return p, nil
 }
 
 func (p *connPool) Get(ctx context.Context) (*conn, error) {
 	select {
 	case <-ctx.Done():
 		return nil, ctx.Err()
-	case conn := <-p.c:
+
+	case conn := <-p.connCh:
 		return conn, nil
+
+	// TODO: create after a timeout ?
 	default:
 		var d net.Dialer
 		c, err := d.DialContext(ctx, p.network, p.address)
 		if err != nil {
 			return nil, err
 		}
-		return &conn{Conn: c, p: p.c}, nil
+		return &conn{Conn: c, p: p.connCh}, nil
 	}
 }
 
-// dial tries to stablish a new connection before a context is canceled
-// while respecting the limit for open connections.
-func (p *connPool) dial(ctx context.Context) (net.Conn, error) {
-	var d net.Dialer
-	c, err := d.DialContext(ctx, p.network, p.address)
-	if err != nil {
-		return nil, err
+func (p *connPool) Put(c *conn) {
+	select {
+	// BUG: not everything is read from a conn
+	// case c.p <- c:
+	default:
+		// we are over pool limit - close conn
+		c.Close()
 	}
-	return &conn{Conn: c, p: p.c}, nil
 }
 
 type conn struct {
