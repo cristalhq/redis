@@ -56,12 +56,12 @@ func (ss SortedSet) BlockingPopMin(ctx context.Context) (*SortedSetWithKey, erro
 // See: https://redis.io/commands/zadd
 func (ss SortedSet) Add(ctx context.Context, items ...SortedSetItem) (int64, error) {
 	return 0, nil
-	req := newRequestSize(2+2*len(items), "\r\n$4\r\nZADD\r\n$")
-	req.addString(ss.name)
-	for range items {
-		// req.addStringInt(ss.name)
-	}
-	return ss.c.cmdInt(ctx, req)
+	// req := newRequestSize(2+2*len(items), "\r\n$4\r\nZADD\r\n$")
+	// req.addString(ss.name)
+	// for range items {
+	// 	// req.addStringInt(ss.name)
+	// }
+	// return ss.c.cmdInt(ctx, req)
 }
 
 // Cardinality returns the sorted set cardinality (number of elements).
