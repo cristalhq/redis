@@ -76,7 +76,10 @@ func newContext() context.Context {
 }
 
 func getTestClient() (*Client, error) {
-	return NewClient(context.Background(), redisAddr)
+	return NewClient(context.Background(), &Config{
+		Network: "tcp",
+		Address: redisAddr,
+	})
 }
 
 func removeKey(t testing.TB, key string) {
