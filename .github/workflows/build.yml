@@ -19,15 +19,15 @@ on:
 jobs:
   # TODO: disable for now
   build:
-    uses: cristalhq/.github/.github/workflows/build.yml@v0.2.2
+    uses: cristalhq/.github/.github/workflows/build.yml@v0.3.0
     with:
       skipTests: true # e2e.yml is responsible for tests
 
   vuln:
-    uses: cristalhq/.github/.github/workflows/vuln.yml@v0.2.2
+    uses: cristalhq/.github/.github/workflows/vuln.yml@v0.3.0
 
   release:
     if: github.event_name == 'workflow_dispatch'
-    uses: cristalhq/.github/.github/workflows/release.yml@v0.2.2
+    uses: cristalhq/.github/.github/workflows/release.yml@v0.3.0
     with:
       tag: ${{ github.event.input.tag }}
