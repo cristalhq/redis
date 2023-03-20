@@ -14,20 +14,13 @@ on:
         required: true
         default: 'v0.0.0'
 
-
-# See https://github.com/cristalhq/.github/.github/workflows
+# See https://github.com/cristalhq/.github/tree/main/.github/workflows
 jobs:
   # TODO: disable for now
   build:
-    uses: cristalhq/.github/.github/workflows/build.yml@v0.2.2
+    uses: cristalhq/.github/.github/workflows/build.yml@v0.4.0
     with:
       skipTests: true # e2e.yml is responsible for tests
 
   vuln:
-    uses: cristalhq/.github/.github/workflows/vuln.yml@v0.2.2
-
-  release:
-    if: github.event_name == 'workflow_dispatch'
-    uses: cristalhq/.github/.github/workflows/release.yml@v0.2.2
-    with:
-      tag: ${{ github.event.input.tag }}
+    uses: cristalhq/.github/.github/workflows/vuln.yml@v0.4.0
