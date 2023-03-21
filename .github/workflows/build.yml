@@ -18,9 +18,9 @@ on:
 jobs:
   # TODO: disable for now
   build:
-    uses: cristalhq/.github/.github/workflows/build.yml@v0.4.0
+    uses: cristalhq/.github/.github/workflows/build.yml@v0.5.0
     with:
       skipTests: true # e2e.yml is responsible for tests
 
   vuln:
-    uses: cristalhq/.github/.github/workflows/vuln.yml@v0.4.0
+    uses: cristalhq/.github/.github/workflows/vuln.yml@v0.5.0
